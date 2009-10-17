@@ -1,0 +1,246 @@
+=head1 NAME
+
+Net::FastCGI::Record - Object representation of a C<FCGI_Record>
+
+=head1 SYNOPSIS
+
+    # Constructors
+    $record = Net::FastCGI::Record->new($type, $request_id);
+    
+    # Methods
+    $octets         = $record->build;
+    $type           = $record->get_type;
+    $request_id     = $record->get_request_id;
+    $content        = $record->get_content;
+    $content_length = $record->get_content_length;
+    $boolean        = $record->has_content;
+    $boolean        = $record->is_management;
+    $boolean        = $record->is_discrete;
+    $boolean        = $record->is_stream;
+    $string         = $record->to_string;
+
+=head1 DESCRIPTION
+
+=head1 CONSTRUCTORS
+
+=head2 new
+
+Constructs an instance of C<Net::FastCGI::Record>.
+
+I<Usage>
+
+    $record = Net::FastCGI::Record->new($type, $request_id);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of C<Net::FastCGI::Record>.
+
+=back
+
+=head1 METHODS
+
+=head2 build
+
+I<Usage>
+
+    $octets = $record->build;
+
+I<Returns>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the record.
+
+=back
+
+=head2 get_type
+
+I<Usage>
+
+    $type = $record->get_type;
+
+I<Returns>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=back
+
+=head2 get_request_id
+
+I<Usage>
+
+    $request_id = $record->get_request_id;
+
+I<Returns>
+
+=over 4
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=back
+
+=head2 get_content
+
+I<Usage>
+
+    $content = $record->get_content;
+
+I<Returns>
+
+=over 4
+
+=item C<$content>
+
+A string of octets containing the body.
+
+=back
+
+=head2 get_content_length
+
+I<Usage>
+
+    $content_length = $record->get_content_length;
+
+I<Returns>
+
+=over 4
+
+=item C<$content_length>
+
+An unsigned 16-bit integer.
+
+=back
+
+=head2 has_content
+
+I<Usage>
+
+    $boolean = $record->has_content;
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not record has content.
+
+=back
+
+=head2 is_management
+
+I<Usage>
+
+    $boolean = $record->is_management;
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not record is a management record.
+
+=back
+
+=head2 is_discrete
+
+I<Usage>
+
+    $boolean = $record->is_discrete;
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not record is a discrete record.
+
+=back
+
+=head2 is_stream
+
+I<Usage>
+
+    $boolean = $record->is_stream;
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not record is a stream record.
+
+=back
+
+=head2 to_string
+
+I<Usage>
+
+    $string = $record->to_string;
+
+I<Returns>
+
+=over 4
+
+=item C<$string>
+
+An ASCII string suitable for human consumption.
+
+=back
+
+=head1 EXPORTS
+
+None.
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<http://www.fastcgi.com/devkit/doc/fcgi-spec.html#S3.3>
+
+=item L<Net::FastCGI::Protocol/build_header>
+
+=item L<Net::FastCGI::Protocol/build_record>
+
+=back
+
+=head1 AUTHOR
+
+Christian Hansen C<chansen@cpan.org>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Christian Hansen. All rights reserved.
+
+This program is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
+

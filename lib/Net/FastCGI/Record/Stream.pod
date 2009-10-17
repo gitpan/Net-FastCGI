@@ -1,0 +1,82 @@
+=head1 NAME
+
+Net::FastCGI::Record::Stream - Object representation of a FCGI Stream record
+
+=head1 SYNOPSIS
+
+    # Constructors
+    $record = Net::FastCGI::Record::Stream->new($type, $request_id);
+    $record = Net::FastCGI::Record::Stream->new($type, $request_id, $content);
+
+=head1 DESCRIPTION
+
+=head1 INHERITANCE
+
+C<Net::FastCGI::Record::Stream> extends L<Net::FastCGI::Record>.
+
+=head1 CONSTRUCTORS
+
+=head2 new
+
+Constructs an instance of C<Net::FastCGI::Record::Stream>.
+
+I<Usage>
+
+    $record = Net::FastCGI::Record::Stream->new($type, $request_id);
+    $record = Net::FastCGI::Record::Stream->new($type, $request_id, $content);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$content> (optional)
+
+A string of octets containing the body, must be less than or equal to 65535 octets in length.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of C<Net::FastCGI::Record::Stream>.
+
+=back
+
+=head1 EXPORTS
+
+None.
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<http://www.fastcgi.com/devkit/doc/fcgi-spec.html#S5.2>
+
+=item L<Net::FastCGI::Record>
+
+=item L<Net::FastCGI::Protocol/build_record>
+
+=back
+
+=head1 AUTHOR
+
+Christian Hansen C<chansen@cpan.org>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Christian Hansen. All rights reserved.
+
+This program is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
+

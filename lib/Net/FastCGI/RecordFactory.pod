@@ -1,0 +1,567 @@
+=head1 NAME
+
+Net::FastCGI::RecordFactory - Factory for Net::FastCGI::Record objects.
+
+=head1 SYNOPSIS
+
+    # Constructor
+    $factory = Net::FastCGI::RecordFactory->new;
+    
+    # Methods
+    
+    # FCGI_ABORT_REQUEST
+    $record = $factory->create_abort_request($request_id);
+    
+    # FCGI_BEGIN_REQUEST
+    $record = $factory->create_begin_request($request_id, $role, $flags);
+    
+    # FCGI_END_REQUEST
+    $record = $factory->create_end_request($request_id, $application_status, $protocol_status);
+    
+    # FCGI_PARAMS
+    $record = $factory->create_params($request_id);
+    $record = $factory->create_params($request_id, $content);
+    
+    # FCGI_STDIN
+    $record = $factory->create_stdin($request_id);
+    $record = $factory->create_stdin($request_id, $content);
+    
+    # FCGI_STDOUT
+    $record = $factory->create_stdout($request_id);
+    $record = $factory->create_stdout($request_id, $content);
+    
+    # FCGI_STDERR
+    $record = $factory->create_stderr($request_id);
+    $record = $factory->create_stderr($request_id, $content);
+    
+    # FCGI_DATA
+    $record = $factory->create_data($request_id);
+    $record = $factory->create_data($request_id, $content);
+    
+    # FCGI_UNKNOWN_TYPE
+    $record = $factory->create_unknown_type($unknown_type);
+    
+    # FCGI_GET_VALUES
+    $record = $factory->create_get_values;
+    $record = $factory->create_get_values($values);
+    
+    # FCGI_GET_VALUES_RESULT
+    $record = $factory->create_get_values_result($values);
+    
+    $record = $factory->parse($type, $request_id);
+    $record = $factory->parse($type, $request_id, $content);
+    
+
+=head1 DESCRIPTION
+
+=head1 CONSTRUCTORS
+
+=head2 new
+
+Constructs an instance of C<Net::FastCGI::RecordFactory>.
+
+I<Usage>
+
+    $factory = Net::FastCGI::RecordFactory->new;
+
+I<Returns>
+
+=over 4
+
+=item C<$factory>
+
+An instance of C<Net::FastCGI::RecordFactory>.
+
+=back
+
+=head1 METHODS
+
+=head2 create_abort_request
+
+Creates a C<FCGI_ABORT_REQUEST> record.
+
+I<Usage>
+
+    $record = $factory->create_abort_request($request_id);
+
+I<Arguments>
+
+=over 4
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of L<Net::FastCGI::Record>.
+
+=back
+
+=head2 create_begin_request
+
+Creates a C<FCGI_BEGIN_REQUEST> record.
+
+I<Usage>
+
+    $record = $factory->create_begin_request($request_id, $role, $flags);
+
+I<Arguments>
+
+=over 4
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$role>
+
+An unsigned 16-bit integer.
+
+=item C<$flags>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of L<Net::FastCGI::Record::BeginRequest>.
+
+=back
+
+=head2 create_end_request
+
+Creates a C<FCGI_END_REQUEST> record.
+
+I<Usage>
+
+    $record = $factory->create_end_request($request_id, $application_status, $protocol_status);
+
+I<Arguments>
+
+=over 4
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$application_status>
+
+An unsigned 16-bit integer.
+
+=item C<$protocol_status>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of L<Net::FastCGI::Record::EndRequest>.
+
+=back
+
+=head2 create_stream
+
+Creates a stream record.
+
+I<Usage>
+
+    $record = $factory->create_stream($type, $request_id);
+    $record = $factory->create_stream($type, $request_id, $content);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$content> (optional)
+
+A string of octets containing the body, must be less than or equal to 65535 octets in length.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of L<Net::FastCGI::Record::Stream>.
+
+=back
+
+=head2 create_params
+
+Creates a C<FCGI_PARAMS> stream record.
+
+I<Usage>
+
+    $record = $factory->create_params($request_id);
+    $record = $factory->create_params($request_id, $content);
+
+I<Arguments>
+
+=over 4
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$content> (optional)
+
+A string of octets containing the body, must be less than or equal to 65535 octets in length.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of L<Net::FastCGI::Record::Stream>.
+
+=back
+
+=head2 create_stdin
+
+Creates a C<FCGI_STDIN> stream record.
+
+I<Usage>
+
+    $record = $factory->create_stdin($request_id);
+    $record = $factory->create_stdin($request_id, $content);
+
+I<Arguments>
+
+=over 4
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$content> (optional)
+
+A string of octets containing the body, must be less than or equal to 65535 octets in length.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of L<Net::FastCGI::Record::Stream>.
+
+=back
+
+=head2 create_stdout
+
+Creates a C<FCGI_STDOUT> stream record.
+
+I<Usage>
+
+    $record = $factory->create_stdout($request_id);
+    $record = $factory->create_stdout($request_id, $content);
+
+I<Arguments>
+
+=over 4
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$content> (optional)
+
+A string of octets containing the body, must be less than or equal to 65535 octets in length.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of L<Net::FastCGI::Record::Stream>.
+
+=back
+
+=head2 create_stderr
+
+Creates a C<FCGI_STDERR> stream record.
+
+I<Usage>
+
+    $record = $factory->create_stderr($request_id);
+    $record = $factory->create_stderr($request_id, $content);
+
+I<Arguments>
+
+=over 4
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$content> (optional)
+
+A string of octets containing the body, must be less than or equal to 65535 octets in length.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of L<Net::FastCGI::Record::Stream>.
+
+=back
+
+=head2 create_data
+
+Creates a C<FCGI_DATA> stream record.
+
+I<Usage>
+
+    $record = $factory->create_data($request_id);
+    $record = $factory->create_data($request_id, $content);
+
+I<Arguments>
+
+=over 4
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$content> (optional)
+
+A string of octets containing the body, must be less than or equal to 65535 octets in length.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of L<Net::FastCGI::Record::Stream>.
+
+=back
+
+=head2 create_unknown_type
+
+Creates a C<FCGI_UNKNOWN_TYPE> record.
+
+I<Usage>
+
+    $record = $factory->create_unknown_type($unknown_type);
+
+I<Arguments>
+
+=over 4
+
+=item C<$unknown_type>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of L<Net::FastCGI::Record::UnknownType>.
+
+=back
+
+=head2 create_values
+
+Creates a values record.
+
+I<Usage>
+
+    $record = $factory->create_values($type, $values);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=item C<$values>
+
+A hash reference containing name/value pairs.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of L<Net::FastCGI::Record::Values>.
+
+=back
+
+=head2 create_get_values
+
+Creates a C<FCGI_GET_VALUES> record.
+
+I<Usage>
+
+    $record = $factory->create_get_values;
+    $record = $factory->create_get_values($values);
+
+I<Arguments>
+
+=over 4
+
+=item C<$values> (optional)
+
+A hash reference containing name/value pairs.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of L<Net::FastCGI::Record::Values>.
+
+=back
+
+=head2 create_get_values_result
+
+Creates a C<FCGI_GET_VALUES_RESULT> record.
+
+I<Usage>
+
+    $record = $factory->create_get_values_result($values);
+
+I<Arguments>
+
+=over 4
+
+=item C<$values>
+
+A hash reference containing name/value pairs.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of L<Net::FastCGI::Record::Values>.
+
+=back
+
+=head2 parse
+
+Parses a record body.
+
+I<Usage>
+
+    $record = $factory->parse($type, $request_id);
+    $record = $factory->parse($type, $request_id, $content);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$content> (optional)
+
+A string of octets containing the body.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of L<Net::FastCGI::Record>.
+
+=back
+
+=head1 EXPORTS
+
+None.
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<Net::FastCGI::Record>
+
+=item L<Net::FastCGI::Record::BeginRequest>
+
+=item L<Net::FastCGI::Record::EndRequest>
+
+=item L<Net::FastCGI::Record::Stream>
+
+=item L<Net::FastCGI::Record::UnknownType>
+
+=item L<Net::FastCGI::Record::Values>
+
+=back
+
+=head1 AUTHOR
+
+Christian Hansen C<chansen@cpan.org>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Christian Hansen. All rights reserved.
+
+This program is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
+

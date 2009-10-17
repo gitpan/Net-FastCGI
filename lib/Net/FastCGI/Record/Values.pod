@@ -1,0 +1,132 @@
+=head1 NAME
+
+Net::FastCGI::Record::Values - Object representation of a FCGI Values record
+
+=head1 SYNOPSIS
+
+    # Constructors
+    $record = Net::FastCGI::Record::Values->new($type, $values);
+    $record = Net::FastCGI::Record::Values->parse($type, $octets);
+    
+    # Methods
+    $values = $record->get_values;
+
+=head1 DESCRIPTION
+
+=head1 INHERITANCE
+
+C<Net::FastCGI::Record::Values> extends L<Net::FastCGI::Record>.
+
+=head1 CONSTRUCTORS
+
+=head2 new
+
+Constructs an instance of C<Net::FastCGI::Record::Values>.
+
+I<Usage>
+
+    $record = Net::FastCGI::Record::Values->new($type, $values);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=item C<$values>
+
+A hash reference containing name/value pairs.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of C<Net::FastCGI::Record::Values>.
+
+=back
+
+=head2 parse
+
+Parses a FCGI Values body.
+
+I<Usage>
+
+    $record = Net::FastCGI::Record::Values->parse($type, $octets);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=item C<$octets>
+
+A string of octets containing the body.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$record>
+
+An instance of C<Net::FastCGI::Record::Values>.
+
+=back
+
+=head1 METHODS
+
+=head2 get_values
+
+I<Usage>
+
+    $values = $record->get_values;
+
+I<Returns>
+
+=over 4
+
+=item C<$values>
+
+A hash reference containing name/value pairs.
+
+=back
+
+=head1 EXPORTS
+
+None.
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<http://www.fastcgi.com/devkit/doc/fcgi-spec.html#S4.1>
+
+=item L<Net::FastCGI::Record>
+
+=item L<Net::FastCGI::Protocol/build_params>
+
+=item L<Net::FastCGI::Protocol/parse_params>
+
+=back
+
+=head1 AUTHOR
+
+Christian Hansen C<chansen@cpan.org>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Christian Hansen. All rights reserved.
+
+This program is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
+

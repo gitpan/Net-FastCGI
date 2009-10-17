@@ -1,0 +1,157 @@
+=head1 NAME
+
+Net::FastCGI::Constant - FastCGI protocol constants.
+
+=head1 DESCRIPTION
+
+=head1 CONSTANTS
+
+Constants can either be imported individually or in sets grouped by tag names. The tag names are:
+
+=head2 C<:common>
+
+=over 4
+
+=item FCGI_MAX_LENGTH
+
+=item FCGI_HEADER_LEN
+
+=item FCGI_VERSION_1
+
+=item FCGI_NULL_REQUEST_ID
+
+=back
+
+=head2 C<:type>
+
+Values for type component of C<FCGI_Header>.
+
+=over 4
+
+=item FCGI_BEGIN_REQUEST
+
+=item FCGI_ABORT_REQUEST
+
+=item FCGI_END_REQUEST
+
+=item FCGI_PARAMS
+
+=item FCGI_STDIN
+
+=item FCGI_STDOUT
+
+=item FCGI_STDERR
+
+=item FCGI_DATA
+
+=item FCGI_GET_VALUES
+
+=item FCGI_GET_VALUES_RESULT
+
+=item FCGI_UNKNOWN_TYPE
+
+=item FCGI_MAXTYPE
+
+=back
+
+=head2 C<:flag>
+
+Mask for flags component of C<FCGI_BeginRequestBody>
+
+=over 4
+
+=item FCGI_KEEP_CONN
+
+=back
+
+=head2 C<:role>
+
+Values for role component of C<FCGI_BeginRequestBody>.
+
+=over 4
+
+=item FCGI_RESPONDER
+
+=item FCGI_AUTHORIZER
+
+=item FCGI_FILTER
+
+=back
+
+=head2 C<:protocol_status>
+
+Values for protocol_status component of C<FCGI_EndRequestBody>.
+
+=over 4
+
+=item FCGI_REQUEST_COMPLETE
+
+=item FCGI_CANT_MPX_CONN
+
+=item FCGI_OVERLOADED
+
+=item FCGI_UNKNOWN_ROLE
+
+=back
+
+=head2 C<:value>
+
+Variable names for FCGI_GET_VALUES / FCGI_GET_VALUES_RESULT records
+
+=over 4
+
+=item FCGI_MAX_CONNS
+
+=item FCGI_MAX_REQS
+
+=item FCGI_MPXS_CONNS
+
+=back
+
+=head2 C<:pack>
+
+C<pack()> templates
+
+=over 4
+
+=item FCGI_Header
+
+C<CCnnCx>
+
+=item FCGI_BeginRequestBody
+
+C<nCx5>
+
+=item FCGI_EndRequestBody
+
+C<NCx3>
+
+=item FCGI_UnknownTypeBody
+
+C<Cx7>
+
+=back
+
+=head1 EXPORTS
+
+None by default. All functions can be exported using the C<:all> tag or individually.
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<http://www.fastcgi.com/devkit/doc/fcgi-spec.html>
+
+=back
+
+=head1 AUTHOR
+
+Christian Hansen C<chansen@cpan.org>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Christian Hansen. All rights reserved.
+
+This program is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
+

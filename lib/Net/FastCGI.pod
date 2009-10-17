@@ -1,0 +1,135 @@
+=head1 NAME
+
+Net::FastCGI - FastCGI
+
+=head1 DESCRIPTION
+
+=head1 PACKAGES
+
+=over 4
+
+=item L<Net::FastCGI::Constant>
+
+FastCGI protocol constants.
+
+=item L<Net::FastCGI::Protocol>
+
+Provides functions to build and parse FastCGI messages.
+
+=item L<Net::FastCGI::Header>
+
+Object representation of a C<FCGI_Header>.
+
+=item L<Net::FastCGI::Record>
+
+Object representation of a C<FCGI_Record>.
+
+=item L<Net::FastCGI::Record::BeginRequest>
+
+Object representation of a C<FCGI_BeginRequestRecord>
+
+=item L<Net::FastCGI::Record::EndRequest>
+
+Object representation of a C<FCGI_EndRequestRecord>
+
+=item L<Net::FastCGI::Record::Stream>
+
+Object representation of a FCGI Stream record
+
+=item L<Net::FastCGI::Record::UnknownType>
+
+Object representation of a C<FCGI_UnknownTypeRecord>
+
+=item L<Net::FastCGI::Record::Values>
+
+Object representation of a FCGI Values record
+
+=item L<Net::FastCGI::RecordFactory>
+
+Factory for Net::FastCGI::Record objects
+
+=back
+
+=head1 CONSTANTS
+
+=head2 HAVE_XS
+
+    if ( Net::FastCGI::HAVE_XS ) {
+        print "using XS implementation";
+    }
+    else {
+        print "using PP implementation";
+    }
+
+=head1 ENVIRONMENT
+
+Set the environment variable C<NET_FASTCGI_PP> to a true value before loading this package to disable usage of XS implementation.
+
+=head1 PREREQUISITES
+
+=head2 Run-Time
+
+=over 4
+
+=item L<perl> 5.6 or greater.
+
+=item L<Carp>, core module.
+
+=item L<Data::Dumper>, core module.
+
+=item L<Exporter>, core module.
+
+=item L<Scalar::Util>, core module since 5.8
+
+=back
+
+=head2 Build-Time
+
+In addition to Run-Time:
+
+=over 4
+
+=item L<Test::More> 0.47 or greater, core module since 5.6.2.
+
+=item L<Test::Exception>.
+
+=item L<Test::BinaryData> 0.007 or greater.
+
+=back
+
+=head1 INSTALL
+
+    perl Makefile.PL
+    make
+    make test
+    sudo make install
+
+=head1 EXPORTS
+
+None.
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<http://www.fastcgi.com/devkit/doc/fcgi-spec.html>
+
+=item L<FCGI>
+
+=item L<FCGI::Async>
+
+=item L<POE::Component::FastCGI>
+
+=back
+
+=head1 AUTHOR
+
+Christian Hansen C<chansen@cpan.org>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Christian Hansen. All rights reserved.
+
+This program is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
+

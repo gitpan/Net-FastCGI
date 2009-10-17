@@ -1,0 +1,503 @@
+=head1 NAME
+
+Net::FastCGI::Util - Provides utility functions and constants intended for internal use only.
+
+=head1 SYNOPSIS
+
+     carp('Foo Bar');
+     carpf('Foo %s' 'Bar');
+     
+     croak('Foo Bar');
+     croakf('Foo %s', 'Bar');
+     
+     $boolean = is_cvref($scalar);
+     $boolean = is_hvref($scalar);
+     $boolean = is_instance_of($scalar, $class);
+     $boolean = is_object($scalar);
+     $boolean = is_octets($scalar);
+     $boolean = is_octets_ge($scalar, $minimum);
+     $boolean = is_octets_le($scalar, $maximum);
+     $boolean = is_uint($scalar);
+     $boolean = is_uint8($scalar);
+     $boolean = is_uint16($scalar);
+     $boolean = is_uint31($scalar);
+     $boolean = is_uint32($scalar);
+
+=head1 DESCRIPTION
+
+Provides utility functions and constants intended for internal use within C<Net::FastCGI>.
+
+=head1 FUNCTIONS
+
+=head2 carp
+
+I<Usage>
+
+    carp(@message);
+
+I<Arguments>
+
+=over 4
+
+=item C<@message>
+
+=back
+
+=head2 carpf
+
+I<Usage>
+
+    carpf($format, @list);
+
+I<Arguments>
+
+=over 4
+
+=item C<$format>
+
+=item C<@list>
+
+=back
+
+=head2 croak
+
+I<Usage>
+
+    croak(@message);
+
+I<Arguments>
+
+=over 4
+
+=item C<@message>
+
+=back
+
+=head2 croakf
+
+I<Usage>
+
+    croakf($format, @list);
+
+I<Arguments>
+
+=over 4
+
+=item C<$format>
+
+=item C<@list>
+
+=back
+
+=head2 is_cvref
+
+I<Usage>
+
+    $boolean = is_cvref($scalar);
+    $boolean = is_cvref( sub {} );        # true
+    $boolean = is_cvref( \&is_cvref );    # true
+    $boolean = is_cvref( bless(sub {}) ); # false
+
+I<Arguments>
+
+=over 4
+
+=item C<$scalar>
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$scalar> is a unblessed code reference.
+
+=back
+
+=head2 is_hvref
+
+I<Usage>
+
+    $boolean = is_hvref($scalar);
+    $boolean = is_hvref( {} );        # true
+    $boolean = is_hvref( bless({}) ); # false
+
+I<Arguments>
+
+=over 4
+
+=item C<$scalar>
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$scalar> is a unblessed hash reference.
+
+=back
+
+=head2 is_handle
+
+I<Usage>
+
+    $boolean = is_handle($scalar);
+    $boolean = is_handle(*STDOUT);         # true
+    $boolean = is_handle(\*STDOUT);        # true
+    $boolean = is_handle(IO::Handle->new); # true
+    $boolean = is_handle(IO::String->new); # true
+    $boolean = is_handle(STDOUT);          # false
+
+I<Arguments>
+
+=over 4
+
+=item C<$scalar>
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$scalar> is a handle.
+
+=back
+
+=head2 is_instance_of
+
+I<Usage>
+
+    $boolean = is_instance_of($scalar, $class);
+
+I<Arguments>
+
+=over 4
+
+=item C<$scalar>
+
+=item C<$class>
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$scalar> is an instance of C<$class>.
+
+=back
+
+=head2 is_object
+
+I<Usage>
+
+    $boolean = is_object($scalar);
+
+I<Arguments>
+
+=over 4
+
+=item C<$scalar>
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$scalar> is an object.
+
+=back
+
+=head2 is_octets
+
+I<Usage>
+
+    $boolean = is_octets($scalar);
+
+I<Arguments>
+
+=over 4
+
+=item C<$scalar>
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$scalar> is octets.
+
+=back
+
+=head2 is_octets_ge
+
+I<Usage>
+
+    $boolean = is_octets_ge($scalar, $low);
+
+I<Arguments>
+
+=over 4
+
+=item C<$scalar>
+
+=item C<$low>
+
+An unsigned integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$scalar> is octets and is greater than or equal to C<$low> in length.
+
+=back
+
+=head2 is_octets_le
+
+I<Usage>
+
+    $boolean = is_octets_le($scalar, $high);
+
+I<Arguments>
+
+=over 4
+
+=item C<$scalar>
+
+=item C<$high>
+
+An unsigned integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$scalar> is octets and is less than or equal to C<$high> in length.
+
+=back
+
+=head2 is_uint
+
+I<Usage>
+
+    $boolean = is_uint($scalar);
+
+I<Arguments>
+
+=over 4
+
+=item C<$scalar>
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$scalar> is an unsigned integer.
+
+=back
+
+=head2 is_uint8
+
+I<Usage>
+
+    $boolean = is_uint8($scalar);
+
+I<Arguments>
+
+=over 4
+
+=item C<$scalar>
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$scalar> is an unsigned 8-bit integer.
+
+=back
+
+=head2 is_uint16
+
+I<Usage>
+
+    $boolean = is_uint16($scalar);
+
+I<Arguments>
+
+=over 4
+
+=item C<$scalar>
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$scalar> is an unsigned 16-bit integer.
+
+=back
+
+=head2 is_uint31
+
+I<Usage>
+
+    $boolean = is_uint31($scalar);
+
+I<Arguments>
+
+=over 4
+
+=item C<$scalar>
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$scalar> is an unsigned 31-bit integer.
+
+=back
+
+=head2 is_uint32
+
+I<Usage>
+
+    $boolean = is_uint32($scalar);
+
+I<Arguments>
+
+=over 4
+
+=item C<$scalar>
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$scalar> is an unsigned 32-bit integer.
+
+=back
+
+=head1 CONSTANTS
+
+=head2 ERRMSG_CVREF
+
+C<Argument "%s" is not a CODE reference>
+
+=head2 ERRMSG_HVREF
+
+C<Argument "%s" is not a HASH reference>
+
+=head2 ERRMSG_INSTANCE_OF
+
+C<Argument "%s" is not an instance of "%s">
+
+=head2 ERRMSG_OCTETS_GE
+
+C<Argument "%s" must be greater than or equal to %u octets in length>
+
+=head2 ERRMSG_OCTETS_LE
+
+C<Argument "%s" must be less than or equal to %u octets in length>
+
+=head2 ERRMSG_OFFSET
+
+C<Argument "%s" is outside of octets length>
+
+=head2 ERRMSG_UINT
+
+C<Argument "%s" is not an unsigned integer>
+
+=head2 ERRMSG_UINT8
+
+C<Argument "%s" is not an unsigned 8-bit integer>
+
+=head2 ERRMSG_UINT16
+
+C<Argument "%s" is not an unsigned 16-bit integer>
+
+=head2 ERRMSG_UINT31
+
+C<Argument "%s" is not an unsigned 31-bit integer>
+
+=head2 ERRMSG_UINT32
+
+C<Argument "%s" is not an unsigned 32-bit integer>
+
+=head2 ERRMSG_VERSION
+
+C<Unsupported FastCGI version: %u>
+
+=head1 EXPORTS
+
+None by default. Functions and constants can either be imported individually or
+in sets grouped by tag names. The tag names are:
+
+=over 4
+
+=item C<:all> exports all functions and constants.
+
+=item C<:carp> exports C<carp>, C<carpf>, C<croak>, and C<croakf>.
+
+=item C<:errmsg> exports all C<ERRMSG_> constants.
+
+=item C<:predicate> exports all C<is_> functions.
+
+=item C<:common> exports C<:carp>, C<:errmsg> and C<:predicate>.
+
+=back
+
+=head1 AUTHOR
+
+Christian Hansen C<chansen@cpan.org>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Christian Hansen. All rights reserved.
+
+This program is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
+

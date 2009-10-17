@@ -1,0 +1,253 @@
+=head1 NAME
+
+Net::FastCGI::Header - Object representation of a C<FCGI_Header>
+
+=head1 SYNOPSIS
+
+    # Constructors
+    $header = Net::FastCGI::Header->new($type, $request_id);
+    $header = Net::FastCGI::Header->new($type, $request_id, $content_length);
+    $header = Net::FastCGI::Header->new($type, $request_id, $content_length, $padding_length);
+    $header = Net::FastCGI::Header->parse($octets);
+    
+    # Methods
+    $octets         = $header->build;
+    $type           = $header->get_type;
+    $request_id     = $header->get_request_id;
+    $content_length = $header->get_content_length;
+    $padding_length = $header->get_padding_length;
+    $boolean        = $header->has_content;
+    $boolean        = $header->has_padding;
+    $string         = $header->to_string;
+
+=head1 DESCRIPTION
+
+=head1 CONSTRUCTORS
+
+=head2 new
+
+Constructs an instance of C<Net::FastCGI::Header>.
+
+I<Usage>
+
+    $header = Net::FastCGI::Header->new($type, $request_id);
+    $header = Net::FastCGI::Header->new($type, $request_id, $content_length);
+    $header = Net::FastCGI::Header->new($type, $request_id, $content_length, $padding_length);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$content_length> (optional)
+
+An unsigned 16-bit integer. Defaults to C<0>.
+
+=item C<$padding_length> (optional)
+
+An unsigned 8-bit integer. Defaults to C<compute_padding_length($content_length)>.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$header>
+
+An instance of C<Net::FastCGI::Header>.
+
+=back
+
+=head2 parse
+
+Parses a C<FCGI_Header>.
+
+I<Usage>
+
+    $header = Net::FastCGI::Header->parse($octets);
+
+I<Arguments>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the header, must be greater than or equal to 8 octets in length.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$header>
+
+An instance of C<Net::FastCGI::Header>.
+
+=back
+
+=head1 METHODS
+
+=head2 build
+
+I<Usage>
+
+    $octets = $header->build;
+
+I<Returns>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the header. String is 8 octets in length.
+
+=back
+
+=head2 get_type
+
+I<Usage>
+
+    $type = $header->get_type;
+
+I<Returns>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=back
+
+=head2 get_request_id
+
+I<Usage>
+
+    $request_id = $header->get_request_id;
+
+I<Returns>
+
+=over 4
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=back
+
+=head2 get_content_length
+
+I<Usage>
+
+    $content_length = $header->get_content_length;
+
+I<Returns>
+
+=over 4
+
+=item C<$content_length>
+
+An unsigned 16-bit integer.
+
+=back
+
+=head2 get_padding_length
+
+I<Usage>
+
+    $padding_length = $header->get_padding_length;
+
+I<Returns>
+
+=over 4
+
+=item C<$padding_length>
+
+An unsigned 8-bit integer.
+
+=back
+
+=head2 has_content
+
+I<Usage>
+
+    $boolean = $header->has_content;
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not record has content.
+
+=back
+
+=head2 has_padding
+
+I<Usage>
+
+    $boolean = $header->has_padding;
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not record has padding.
+
+=back
+
+=head2 to_string
+
+I<Usage>
+
+    $string = $header->to_string;
+
+I<Returns>
+
+=over 4
+
+=item C<$string>
+
+An ASCII string suitable for human consumption.
+
+=back
+
+=head1 EXPORTS
+
+None.
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<http://www.fastcgi.com/devkit/doc/fcgi-spec.html#S3.3>
+
+=item L<Net::FastCGI::Protocol/build_header>
+
+=item L<Net::FastCGI::Protocol/parse_header>
+
+=back
+
+=head1 AUTHOR
+
+Christian Hansen C<chansen@cpan.org>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Christian Hansen. All rights reserved.
+
+This program is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
+

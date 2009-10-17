@@ -1,0 +1,1045 @@
+=head1 NAME
+
+Net::FastCGI::Protocol - Provides functions to build and parse FastCGI messages.
+
+=head1 SYNOPSIS
+
+    # FCGI_Header
+    $octets = build_header($type, $request_id, $content_length, $padding_length);
+    @values = parse_header($octets);
+    
+    # FCGI_BeginRequestBody
+    $octets = build_begin_request_body($role, $flags);
+    @values = parse_begin_request_body($octets);
+    
+    # FCGI_EndRequestBody
+    $octets = build_end_request_body($application_status, $protocol_status);
+    @values = parse_end_request_body($octets);
+    
+    # FCGI_UnknownTypeBody
+    $octets = build_unknown_type_body($type);
+    @values = parse_unknown_type_body($octets);
+    
+    # FCGI_BeginRequestRecord
+    $octets = build_begin_request_record($request_id, $role, $flags);
+    
+    # FCGI_EndRequestRecord
+    $octets = build_end_request_record($request_id, $application_status, $protocol_status);
+    
+    # FCGI_UnknownTypeRecord
+    $octets = build_unknown_type_record($type);
+    
+    # FCGI_Record
+    $octets = build_record($type, $request_id);
+    $octets = build_record($type, $request_id, $content);
+    
+    # FCGI_NameValuePair's
+    $octets = build_params($params);
+    $params = parse_params($octets);
+
+=head1 DESCRIPTION
+
+Provides functions to build and parse FastCGI messages.
+
+=head1 FUNCTIONS
+
+=head2 build_begin_request_body
+
+Builds a C<FCGI_BeginRequestBody>.
+
+I<Usage>
+
+    $octets = build_begin_request_body($role, $flags);
+
+I<Arguments>
+
+=over 4
+
+=item C<$role>
+
+An unsigned 16-bit integer.
+
+=item C<$flags>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the body. String is 8 octets in length.
+
+=back
+
+=head2 build_begin_request_record
+
+Builds a C<FCGI_BeginRequestRecord>.
+
+I<Usage>
+
+    $octets = build_begin_request_record($request_id, $role, $flags);
+
+I<Arguments>
+
+=over 4
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$role>
+
+An unsigned 16-bit integer.
+
+=item C<$flags>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the record. String is 16 octets in length.
+
+=back
+
+=head2 build_end_request_body
+
+Builds a C<FCGI_EndRequestBody>.
+
+I<Usage>
+
+    $octets = build_end_request_body($application_status, $protocol_status);
+
+I<Arguments>
+
+=over 4
+
+=item C<$application_status>
+
+An unsigned 32-bit integer.
+
+=item C<$protocol_status>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the body. String is 8 octets in length.
+
+=back
+
+=head2 build_end_request_record
+
+Builds a C<FCGI_EndRequestRecord>.
+
+I<Usage>
+
+    $octets = build_end_request_record($request_id, $application_status, $protocol_status);
+
+I<Arguments>
+
+=over 4
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$application_status>
+
+An unsigned 32-bit integer.
+
+=item C<$protocol_status>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the record. String is 16 octets in length.
+
+=back
+
+=head2 build_header
+
+Builds a C<FCGI_Header>.
+
+I<Usage>
+
+    $octets = build_header($type, $request_id, $content_length, $padding_length);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$content_length>
+
+An unsigned 16-bit integer.
+
+=item C<$padding_length>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the header. String is 8 octets in length.
+
+=back
+
+=head2 build_padding
+
+I<Usage>
+
+    $octets = build_padding($padding_length);
+
+I<Arguments>
+
+=over 4
+
+=item C<$padding_length>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the padding.
+
+=back
+
+=head2 build_params
+
+Builds C<FCGI_NameValuePair>'s.
+
+I<Usage>
+
+    $octets = build_params($params);
+
+I<Arguments>
+
+=over 4
+
+=item C<$params>
+
+A hash reference containing name/value pairs.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$octets>
+
+=back
+
+=head2 build_params_pair
+
+Builds a C<FCGI_NameValuePair>.
+
+I<Usage>
+
+    $octets = build_params_pair($name, $value);
+
+I<Arguments>
+
+=over 4
+
+=item C<$name>
+
+A string of octets containing the name.
+
+=item C<$value>
+
+A string of octets containing the value.
+
+=back
+
+I<Returns>
+
+=over
+
+=item C<$octets>
+
+A string of octets containing the C<FCGI_NameValuePair>.
+
+=back
+
+=head2 build_params_pair_header
+
+Builds C<FCGI_NameValuePair> header.
+
+I<Usage>
+
+    $octets = build_params_pair_header($name_length, $value_length);
+
+I<Arguments>
+
+=over 4
+
+=item C<$name_length>
+
+An unsigned 31-bit integer.
+
+=item C<$value_length>
+
+An unsigned 31-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the C<FCGI_NameValuePair> header.
+
+=back
+
+=head2 build_record
+
+Builds a C<FCGI_Record>.
+
+I<Usage>
+
+    $octets = build_record($type, $request_id);
+    $octets = build_record($type, $request_id, $content);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$content> (optional)
+
+A string of octets containing the content, must be less than or equal to 65535 octets in length.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the record.
+
+=back
+
+=head2 build_unknown_type_body
+
+Builds a C<FCGI_UnknownTypeBody>.
+
+I<Usage>
+
+    $octets = build_unknown_type_body($type);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the body. String is 8 octets in length.
+
+=back
+
+=head2 build_unknown_type_record
+
+Builds a C<FCGI_UnknownTypRecord>.
+
+I<Usage>
+
+    $octets = build_unknown_type_record($type);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the record. String is 16 octets in length.
+
+=back
+
+=head2 parse_begin_request_body
+
+Parses a C<FCGI_BeginRequestBody>.
+
+I<Usage>
+
+    ($role, $flags) = parse_begin_request_body($octets);
+
+I<Arguments>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the body, must be greater than or equal to 8 octets in length.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$role>
+
+An unsigned 16-bit integer.
+
+=item C<$flags>
+
+An unsigned 8-bit integer.
+
+=back
+
+=head2 parse_end_request_body
+
+Parses a C<FCGI_EndRequestBody>.
+
+I<Usage>
+
+    ($application_status, $protocol_status) = parse_end_request_body($octets);
+
+I<Arguments>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the body, must be greater than or equal to 8 octets in length.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$application_status>
+
+An unsigned 32-bit integer.
+
+=item C<$flags>
+
+An unsigned 8-bit integer.
+
+=back
+
+=head2 parse_header
+
+Parses a C<FCGI_Header>.
+
+I<Usage>
+
+    ($type, $request_id, $content_length, $padding_length) = parse_header($octets);
+
+I<Arguments>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the header, must be greater than or equal to 8 octets in length.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$content_length>
+
+An unsigned 16-bit integer.
+
+=item C<$padding_length>
+
+An unsigned 8-bit integer.
+
+=back
+
+=head2 parse_params
+
+Parses C<FCGI_NameValuePair>'s.
+
+I<Usage>
+
+    $params = parse_params($octets);
+
+I<Arguments>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing C<FCGI_NameValuePair>'s.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$params>
+
+A hash reference containing name/value pairs.
+
+=back
+
+=head2 parse_params_pair
+
+Parses a C<FCGI_NameValuePair>.
+
+I<Usage>
+
+    ($name, $value, $pair_length) = parse_params_pair($octets);
+    ($name, $value, $pair_length) = parse_params_pair($octets, $offset);
+
+I<Arguments>
+
+=over 4
+
+=item C<$octets>
+
+C<$octets> must be greater than or equal to 2 octets in length.
+
+=item C<$offset> (optional)
+
+An unsigned integer containing the offset in octets.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$name>
+
+Octets containing the name.
+
+=item C<$value>
+
+Octets containing the value.
+
+=item C<$pair_length>
+
+Length of C<FCGI_NameValuePair> in octets.
+
+=back
+
+=head2 parse_params_pair_header
+
+Parses a C<FCGI_NameValuePair> header.
+
+I<Usage>
+
+    ($name_length, $value_length, $header_length) = parse_params_pair_header($octets);
+    ($name_length, $value_length, $header_length) = parse_params_pair_header($octets, $offset);
+
+I<Arguments>
+
+=over 4
+
+=item C<$octets>
+
+C<$octets> must be greater than or equal to 2 octets in length.
+
+=item C<$offset> (optional)
+
+An unsigned integer containing the offset in octets.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$name_length>
+
+An unsigned 31-bit integer.
+
+=item C<$value_length>
+
+An unsigned 31-bit integer.
+
+=item C<$header_length>
+
+Length of C<FCGI_NameValuePair> header in octets.
+
+=back
+
+=head2 parse_unknown_type_body
+
+Parses a C<FCGI_UnknownTypeBody>.
+
+I<Usage>
+
+    $type = parse_unknown_type_body($octets);
+
+I<Arguments>
+
+=over 4
+
+=item C<$octets>
+
+C<$octets> must be greater than or equal to 8 octets in length.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=back
+
+=head2 compute_padding_length
+
+I<Usage>
+
+    $length = compute_padding_length($content_length);
+
+I<Arguments>
+
+=over 4
+
+=item C<$content_length>
+
+An unsigned 16-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$length>
+
+Length of padding in octets. Length is between 0 and 7.
+
+=back
+
+=head2 compute_params_length
+
+I<Usage>
+
+    $length = compute_params_length($params);
+
+I<Arguments>
+
+=over 4
+
+=item C<$params>
+
+A hash reference containing name/value pairs.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$length>
+
+Length of params in octets.
+
+=back
+
+=head2 compute_params_pair_length
+
+I<Usage>
+
+    $length = compute_params_pair_length($name, $value);
+
+I<Arguments>
+
+=over 4
+
+=item C<$name>
+
+A string of octets containing the name.
+
+=item C<$value>
+
+A string of octets containing the value.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$length>
+
+Length of C<FCGI_NameValuePair> in octets.
+
+=back
+
+=head2 compute_params_pair_header_length
+
+I<Usage>
+
+    $length = compute_params_pair_header_length($name_length, $value_length);
+
+I<Arguments>
+
+=over 4
+
+=item C<$name_length>
+
+An unsigned 31-bit integer.
+
+=item C<$value_length>
+
+An unsigned 31-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$length>
+
+Length of C<FCGI_NameValuePair> header in octets.
+
+=back
+
+=head2 compute_record_length
+
+I<Usage>
+
+    $length = compute_record_length($content_length);
+
+I<Arguments>
+
+=over 4
+
+=item C<$content_length>
+
+An unsigned 16-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$length>
+
+Length of C<FCGI_Record> in octets.
+
+=back
+
+=head2 get_type_name
+
+I<Usage>
+
+    $name = get_type_name($type);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$name>
+
+A string containing the name of the type.
+
+=back
+
+=head2 get_role_name
+
+I<Usage>
+
+    $name = get_role_name($type);
+
+I<Arguments>
+
+=over 4
+
+=item C<$role>
+
+An unsigned 16-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$name>
+
+A string containing the name of the role.
+
+=back
+
+=head2 get_protocol_status_name
+
+I<Usage>
+
+    $name = get_protocol_status_name($protocol_status);
+
+I<Arguments>
+
+=over 4
+
+=item C<$protocol_status>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$name>
+
+A string containing the name of the protocol status.
+
+=back
+
+=head2 is_known_type
+
+I<Usage>
+
+    $boolean = is_known_type($type);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$type> is a known FastCGI v1 type.
+
+=back
+
+=head2 is_management_type
+
+I<Usage>
+
+    $boolean = is_management_type($type);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$type> is a management type.
+
+=back
+
+=head2 is_discrete_type
+
+I<Usage>
+
+    $boolean = is_discrete_type($type);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$type> is a discrete type.
+
+=back
+
+=head2 is_stream_type
+
+I<Usage>
+
+    $boolean = is_stream_type($type);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$type> is a stream type.
+
+=back
+
+=head1 EXPORTS
+
+None by default. All functions can be exported using the C<:all> tag or individually.
+
+=head1 DIAGNOSTICS
+
+=over 4
+
+=item B<(F)> Usage: %s
+
+=item B<(F)> Argument "%s" is not a hash reference
+
+=item B<(F)> Argument "%s" is not an unsigned integer
+
+=item B<(F)> Argument "%s" is not an unsigned %u-bit integer
+
+=item B<(F)> Argument "%s" must be greater than or equal to %u octets in length
+
+=item B<(F)> Argument "%s" must be less than or equal to %u octets in length
+
+=item B<(F)> Argument "%s" is outside of octets length
+
+=item B<(F)> Unexpected end of octets while parsing FCGI_NameValuePair header
+
+=item B<(F)> Unexpected end of octets while parsing FCGI_NameValuePair name
+
+=item B<(F)> Unexpected end of octets while parsing FCGI_NameValuePair value
+
+=item B<(F)> Unsupported FastCGI version: %u
+
+=back
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<http://www.fastcgi.com/devkit/doc/fcgi-spec.html>
+
+=item L<Net::FastCGI::Constant>
+
+
+=back
+
+=head1 AUTHOR
+
+Christian Hansen C<chansen@cpan.org>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Christian Hansen. All rights reserved.
+
+This program is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
