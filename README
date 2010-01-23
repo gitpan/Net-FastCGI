@@ -1,0 +1,55 @@
+NAME
+    Net::FastCGI - FastCGI
+
+DESCRIPTION
+PACKAGES
+    Net::FastCGI::Constant
+        FastCGI protocol constants.
+
+    Net::FastCGI::Protocol
+        Provides functions to build and parse FastCGI messages.
+
+ENVIRONMENT
+    Set the environment variable "NET_FASTCGI_PP" to a true value before
+    loading this package to disable usage of XS implementation.
+
+PREREQUISITES
+  Run-Time
+    perl 5.6 or greater.
+    Carp, core module.
+    Exporter, core module.
+
+  Build-Time
+    In addition to Run-Time:
+
+    Test::More 0.47 or greater, core module since 5.6.2.
+    Test::Exception.
+    Test::BinaryData 0.007 or greater.
+
+INSTALL
+        perl Makefile.PL
+        make
+        make test
+        sudo make install
+
+EXPORTS
+    None.
+
+SEE ALSO
+    <http://www.fastcgi.com/devkit/doc/fcgi-spec.html>
+    FCGI
+    FCGI::Async
+    FCGI::Client
+    FCGI::EV
+    AnyEvent::FCGI
+    POE::Component::FastCGI
+
+AUTHOR
+    Christian Hansen "chansen@cpan.org"
+
+COPYRIGHT
+    Copyright (c) 2008 Christian Hansen. All rights reserved.
+
+    This program is free software, you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+

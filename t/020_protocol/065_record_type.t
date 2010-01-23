@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 59;
+use Test::More tests => 43;
 use Test::Exception;
 
 BEGIN {
@@ -79,14 +79,6 @@ BEGIN {
         is( is_stream_type($type),   !!1, qq/is_stream_type($type) = true/    );
         is( is_discrete_type($type), !!0, qq/is_discrete_type($type) = false/ );
     }
-}
-
-foreach my $type ( undef, -1, 0, 0xFF ) {
-    my $label = defined($type) ? $type : 'undef';
-    is( is_known_type($type),      !!0, qq/is_known_type($label) = false/ );
-    is( is_discrete_type($type),   !!0, qq/is_discrete_type($label) = false/ );
-    is( is_management_type($type), !!0, qq/is_management_type($label) = false/ );
-    is( is_stream_type($type),     !!0, qq/is_stream_type($label) = false/ );
 }
 
 throws_ok { is_known_type()      } qr/^Usage: /;

@@ -6,9 +6,7 @@ perl_version   '5.006';
 all_from       'lib/Net/FastCGI.pm';
 
 requires       'Carp'             => '0';
-requires       'Data::Dumper'     => '0';
 requires       'Exporter'         => '0';
-requires       'Scalar::Util'     => '0';
 
 test_requires 'Test::More'       => '0.47';
 test_requires 'Test::Exception'  => '0';

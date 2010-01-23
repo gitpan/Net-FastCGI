@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 7;
+use Test::More tests => 4;
 use Test::BinaryData;
 use Test::Exception;
 
@@ -28,8 +28,3 @@ foreach my $test (@tests) {
 
 throws_ok { build_begin_request_record() } qr/^Usage: /;
 
-throws_ok { build_begin_request_record( -1, 0, 0 ) } qr/^Argument "request_id"/;
-
-throws_ok { build_begin_request_record( 0, -1, 0 ) } qr/^Argument "role"/;
-
-throws_ok { build_begin_request_record( 0, 0, -1 ) } qr/^Argument "flags"/;

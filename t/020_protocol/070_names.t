@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 31;
+use Test::More tests => 28;
 use Test::Exception;
 
 BEGIN {
@@ -37,7 +37,7 @@ BEGIN {
     }
 
     foreach my $type ( 0, 0xFF ) {
-        like( get_type_name($type), qr/^Unknown \(0x..\)/ );
+        like( get_type_name($type), qr/^UNKNOWN \(0x..\)/ );
     }
 }
 
@@ -54,7 +54,7 @@ BEGIN {
     }
 
     foreach my $role ( 0, 0xFF ) {
-        like( get_role_name($role), qr/^Unknown \(0x00..\)/ );
+        like( get_role_name($role), qr/^UNKNOWN \(0x00..\)/ );
     }
 }
 
@@ -71,12 +71,9 @@ BEGIN {
         is( get_protocol_status_name($status), $name, qq/get_protocol_status_name($status) = $name/ );
     }
 
-    like( get_protocol_status_name(0xFF), qr/^Unknown \(0xFF\)/ );
+    like( get_protocol_status_name(0xFF), qr/^UNKNOWN \(0xFF\)/ );
 }
 
 throws_ok { get_type_name()              } qr/^Usage: /;
-throws_ok { get_type_name(-1)            } qr/^Argument "type" is not an unsigned/;
 throws_ok { get_role_name()              } qr/^Usage: /;
-throws_ok { get_role_name(-1)            } qr/^Argument "role" is not an unsigned/;
 throws_ok { get_protocol_status_name()   } qr/^Usage: /;
-throws_ok { get_protocol_status_name(-1) } qr/^Argument "protocol_status" is not an unsigned/;

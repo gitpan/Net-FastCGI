@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 12;
+use Test::More tests => 8;
 use Test::BinaryData;
 use Test::Exception;
 
@@ -33,12 +33,8 @@ foreach my $test (@tests) {
     is_deeply(\@got, \@expected, "parse_unknown_type_body()");
 }
 
-foreach my $bad ( undef, -1, 0xFFFF, 0xFFFFFFFF ) {
-    throws_ok { build_unknown_type_body($bad) } qr/^Argument "type"/;
-}
-
 throws_ok { build_unknown_type_body() } qr/^Usage: /;
 
 throws_ok { parse_unknown_type_body() } qr/^Usage: /;
 
-throws_ok { parse_unknown_type_body("") } qr/^Argument "octets" must be greater than or equal to/;
+throws_ok { parse_unknown_type_body("") } qr/^Argument 'octets' must be greater than or equal to/;

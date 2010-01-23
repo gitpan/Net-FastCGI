@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 10;
+use Test::More tests => 8;
 use Test::BinaryData;
 use Test::Exception;
 
@@ -35,11 +35,7 @@ foreach my $test (@tests) {
 
 throws_ok { build_end_request_body() } qr/^Usage: /;
 
-throws_ok { build_end_request_body( -1, 0 ) } qr/^Argument "application_status"/;
-
-throws_ok { build_end_request_body( 0, -1 ) } qr/^Argument "protocol_status"/;
-
 throws_ok { parse_end_request_body() } qr/^Usage: /;
 
-throws_ok { parse_end_request_body("") } qr/^Argument "octets" must be greater than or equal to/;
+throws_ok { parse_end_request_body("") } qr/^Argument 'octets' must be greater than or equal to/;
 

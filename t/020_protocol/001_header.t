@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 14;
+use Test::More tests => 10;
 use Test::BinaryData;
 use Test::Exception;
 
@@ -35,17 +35,9 @@ foreach my $test (@tests) {
 
 throws_ok { build_header() } qr/^Usage: /;
 
-throws_ok { build_header( -1,  0,  0,  0 ) } qr/^Argument "type" is not an unsigned 8-bit integer/;
-
-throws_ok { build_header(  0, -1,  0,  0 ) } qr/^Argument "request_id" is not an unsigned 16-bit integer/;
-
-throws_ok { build_header(  0,  0, -1,  0 ) } qr/^Argument "content_length" is not an unsigned 16-bit integer/;
-
-throws_ok { build_header(  0,  0,  0, -1 ) } qr/^Argument "padding_length" is not an unsigned 8-bit integer/;
-
 throws_ok { parse_header() } qr/^Usage: /;
 
-throws_ok { parse_header("") } qr/^Argument "octets" must be greater than or equal to/;
+throws_ok { parse_header("") } qr/^Argument 'octets' must be greater than or equal to/;
 
 throws_ok { parse_header("\x00\x00\x00\x00\x00\x00\x00\x00") } qr/^Unsupported FastCGI version: 0/;
 

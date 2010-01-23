@@ -1,2 +1,8 @@
+0.02 2010-01-23 22:01
+    - Removed object oriented implementation, it will eventually be released as
+      a separate distribution with different prerequisites.
+    - Removed unnecessary functions from Net::FastCGI::Protocol
+    - Re-factored internals of Net::FastCGI::Protocol to be more performant.
+    - No major changes planned for existing API in Net::FastCGI::Protocol
 0.01_01 2009-10-17 23:56
     - Initial release.

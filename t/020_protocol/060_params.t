@@ -6,14 +6,13 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 15;
+use Test::More tests => 9;
 use Test::BinaryData;
 use Test::Exception;
 
 BEGIN {
     use_ok('Net::FastCGI::Protocol', qw[ build_params
-                                         parse_params
-                                         compute_params_length ]);
+                                         parse_params ]);
 }
 
 my @tests = (
@@ -35,14 +34,5 @@ foreach my $test (@tests) {
     is_deeply($got, $expected, 'parse_params()');
 }
 
-foreach my $test (@tests) {
-    my $expected = $test->[2];
-    my $got      = compute_params_length($test->[1]);
-    is($got, $expected, 'compute_params_length()');
-}
-
-throws_ok { build_params()               } qr/^Usage: /;
-throws_ok { build_params(undef)          } qr/^Argument "params" is not a HASH/;
-throws_ok { parse_params()               } qr/^Usage: /;
-throws_ok { compute_params_length()      } qr/^Usage: /;
-throws_ok { compute_params_length(undef) } qr/^Argument "params"/;
+throws_ok { build_params() } qr/^Usage: /;
+throws_ok { parse_params() } qr/^Usage: /;

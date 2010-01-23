@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 8;
+use Test::More tests => 4;
 use Test::BinaryData;
 use Test::Exception;
 
@@ -24,10 +24,6 @@ foreach my $test (@tests) {
     my $expected = $test->[0];
     my $got      = build_unknown_type_record($test->[1]);
     is_binary($got, $expected, 'build_unknown_type_record()');
-}
-
-foreach my $bad ( undef, -1, 0xFFFF, 0xFFFFFFFF ) {
-    throws_ok { build_unknown_type_record($bad) } qr/^Argument "type"/;
 }
 
 throws_ok { build_unknown_type_record() } qr/^Usage: /;

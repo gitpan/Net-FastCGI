@@ -20,11 +20,8 @@ plan tests => scalar(@modules);
 foreach my $module ( @modules ) {
     my $params = {};
 
-    if ( $module =~ /^Net::FastCGI::(:?Protocol|Util)$/ ) {
+    if ( $module =~ /^Net::FastCGI::Protocol$/ ) {
         $params->{coverage_class} = 'Pod::Coverage::ExportOnly';
-    }
-    elsif ( $module =~ /^Net::FastCGI::(:?Record|Stream)::/ ) {
-        $params->{coverage_class} = 'Pod::Coverage::CountParents';
     }
 
     pod_coverage_ok( $module, $params );

@@ -6,31 +6,22 @@ use warnings;
 use Net::FastCGI qw[];
 
 BEGIN {
-    our $VERSION   = 0.01;
+    our $VERSION   = 0.02;
     our @EXPORT_OK = qw[ build_begin_request_body
                          build_begin_request_record
                          build_end_request_body
                          build_end_request_record
                          build_header
-                         build_padding
                          build_params
-                         build_params_pair
-                         build_params_pair_header
                          build_record
+                         build_stream
                          build_unknown_type_body
                          build_unknown_type_record
                          parse_begin_request_body
                          parse_end_request_body
                          parse_header
                          parse_params
-                         parse_params_pair
-                         parse_params_pair_header
                          parse_unknown_type_body
-                         compute_padding_length
-                         compute_params_length
-                         compute_params_pair_header_length
-                         compute_params_pair_length
-                         compute_record_length
                          get_type_name
                          get_role_name
                          get_protocol_status_name
@@ -41,7 +32,15 @@ BEGIN {
 
     our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
-    if ( Net::FastCGI::HAVE_XS ) {
+    my $want_pp = $ENV{NET_FASTCGI_PP} || $ENV{NET_FASTCGI_PROTOCOL_PP};
+
+    if (!$want_pp) {
+        eval {
+            require Net::FastCGI::XS;
+        };
+    }
+
+    if (!$want_pp || $@) {
         require Net::FastCGI::Protocol::XS;
         Net::FastCGI::Protocol::XS->import(@EXPORT_OK);
     }
@@ -55,3 +54,4 @@ BEGIN {
 }
 
 1;
+
