@@ -6,7 +6,7 @@ use warnings;
 use Net::FastCGI qw[];
 
 BEGIN {
-    our $VERSION   = 0.02;
+    our $VERSION   = 0.03;
     our @EXPORT_OK = qw[ build_begin_request_body
                          build_begin_request_record
                          build_end_request_body
@@ -32,21 +32,21 @@ BEGIN {
 
     our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
-    my $want_pp = $ENV{NET_FASTCGI_PP} || $ENV{NET_FASTCGI_PROTOCOL_PP};
+    my $use_pp = $ENV{NET_FASTCGI_PP} || $ENV{NET_FASTCGI_PROTOCOL_PP};
 
-    if (!$want_pp) {
+    if (!$use_pp) {
         eval {
             require Net::FastCGI::XS;
         };
     }
 
-    if (!$want_pp || $@) {
-        require Net::FastCGI::Protocol::XS;
-        Net::FastCGI::Protocol::XS->import(@EXPORT_OK);
-    }
-    else {
+    if ($use_pp || $@) {
         require Net::FastCGI::Protocol::PP;
         Net::FastCGI::Protocol::PP->import(@EXPORT_OK);
+    }
+    else {
+        require Net::FastCGI::Protocol::XS;
+        Net::FastCGI::Protocol::XS->import(@EXPORT_OK);
     }
 
     require Exporter;

@@ -6,7 +6,7 @@ use Carp                   qw[croak];
 use Net::FastCGI::Constant qw[:all];
 
 BEGIN {
-    our $VERSION   = 0.02;
+    our $VERSION   = 0.03;
     our @EXPORT_OK = qw[ build_begin_request_body
                          build_begin_request_record
                          build_end_request_body
