@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 10;
+use Test::More tests => 13;
 use Test::BinaryData;
 use Test::Exception;
 
@@ -30,16 +30,21 @@ foreach my $test (@tests) {
 foreach my $test (@tests) {
     my @expected = @$test[1..4];
     my @got      = parse_header($test->[0]);
-    is_deeply(\@got, \@expected, "parse_header()");
+    is_deeply(\@got, \@expected, "parse_header() in list context");
 }
 
+my @components = qw(type request_id content_length padding_length);
+foreach my $test (@tests) {
+    my $expected; @$expected{@components} = @$test[1..4];
+    my $got      = parse_header($test->[0]);
+    is_deeply($got, $expected, "parse_header() in scalar context");
+}
+
+
+throws_ok { parse_header("")    } qr/FastCGI: Insufficient .* FCGI_Header/;
+throws_ok { parse_header(undef) } qr/FastCGI: Insufficient .* FCGI_Header/;
+throws_ok { parse_header("\x00\x00\x00\x00\x00\x00\x00\x00") } qr/^FastCGI: Protocol version mismatch/;
+throws_ok { parse_header("\xFF\x00\x00\x00\x00\x00\x00\x00") } qr/^FastCGI: Protocol version mismatch/;
+
 throws_ok { build_header() } qr/^Usage: /;
-
 throws_ok { parse_header() } qr/^Usage: /;
-
-throws_ok { parse_header("") } qr/^Argument 'octets' must be greater than or equal to/;
-
-throws_ok { parse_header("\x00\x00\x00\x00\x00\x00\x00\x00") } qr/^Unsupported FastCGI version: 0/;
-
-throws_ok { parse_header("\xFF\x00\x00\x00\x00\x00\x00\x00") } qr/^Unsupported FastCGI version: 255/;
-

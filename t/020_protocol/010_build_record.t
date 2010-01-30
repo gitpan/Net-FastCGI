@@ -29,6 +29,7 @@ foreach my $test (@tests) {
     is_binary($got, $expected, 'build_record()');
 }
 
+throws_ok { build_record( 0, 0, "\x00" x (0xFFFF + 1) ) } qr/^Invalid Argument: 'content' must be less than or equal to/;
+
 throws_ok { build_record() } qr/^Usage: /;
 
-throws_ok { build_record( 0, 0, "\x00" x (0xFFFF + 1) ) } qr/^Argument 'content' must be less than or equal to/;

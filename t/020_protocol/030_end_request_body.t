@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 use Test::BinaryData;
 use Test::Exception;
 
@@ -33,9 +33,9 @@ foreach my $test (@tests) {
     is_deeply(\@got, \@expected, "parse_end_request_body()");
 }
 
+
+throws_ok { parse_end_request_body("")    } qr/^FastCGI: Insufficient .* FCGI_EndRequestBody/;
+throws_ok { parse_end_request_body(undef) } qr/^FastCGI: Insufficient .* FCGI_EndRequestBody/;
+
 throws_ok { build_end_request_body() } qr/^Usage: /;
-
 throws_ok { parse_end_request_body() } qr/^Usage: /;
-
-throws_ok { parse_end_request_body("") } qr/^Argument 'octets' must be greater than or equal to/;
-

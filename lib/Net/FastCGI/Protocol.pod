@@ -29,15 +29,18 @@ Net::FastCGI::Protocol - Provides functions to build and parse FastCGI messages.
     # FCGI_UnknownTypeRecord
     $octets = build_unknown_type_record($type);
     
-    # FCGI_Record
-    $octets = build_record($type, $request_id);
-    $octets = build_record($type, $request_id, $content);
-    
     # FCGI_NameValuePair's
     $octets = build_params($params);
     $params = parse_params($octets);
     
-    # FCGI Byte Streams
+    # FCGI_Record
+    $octets = build_record($type, $request_id);
+    $octets = build_record($type, $request_id, $content);
+    
+    $record = parse_record($octets);
+    $record = parse_record_body($type, $request_id, $content);
+    
+    # FCGI Stream
     $octets = build_stream($type, $request_id, $octets);
     $octets = build_stream($type, $request_id, $octets, $terminate);
 
@@ -288,7 +291,7 @@ A string of octets containing the record.
 
 =head2 build_stream
 
-Builds a series of byte streams records.
+Builds a series of stream records.
 
 I<Usage>
 
@@ -515,6 +518,122 @@ A hash reference containing name/value pairs.
 
 =back
 
+=head2 parse_record
+
+Parses a C<FCGI_Record>.
+
+I<Usage>
+
+    $record = parse_record($octets);
+
+I<Arguments>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing at least one record.
+
+=back
+
+I<Returns>
+
+A hash reference containing the keys C<type> and C<request_id> and
+following depending on the record type:
+
+=over 4
+
+=item C<FCGI_BEGIN_REQUEST>
+
+=over 8
+
+=item C<role>
+
+=item C<flags>
+
+=back
+
+=item C<FCGI_END_REQUEST>
+
+=over 8
+
+=item C<application_status>
+
+=item C<protocol_status>
+
+=back
+
+=item C<FCGI_PARAMS>
+
+=item C<FCGI_STDIN>
+
+=item C<FCGI_DATA>
+
+=item C<FCGI_STDOUT>
+
+=item C<FCGI_STDERR>
+
+=over 8
+
+=item C<content>
+
+A string of octets containing the content component of the stream.
+
+=back
+
+=item C<FCGI_GET_VALUES> 
+
+=item C<FCGI_GET_VALUES_RESULT>
+
+=over 8
+
+=item C<values>
+
+A hash reference containing name-value pairs.
+
+=back
+
+=item C<FCGI_UNKNOWN_TYPE>
+
+=over 8
+
+=item C<unknown_type>
+
+=back
+
+=back
+
+=head2 parse_record_body
+
+Parses a C<FCGI_Record> body.
+
+I<Usage>
+
+    $record = parse_record_body($type, $request_id, $content);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$content>
+
+A string of octets containing the record content.
+
+=back
+
+I<Returns>
+
+Returns a hash reference containing the C<FCG_Record> components.
+See L</parse_record>.
+
 =head2 parse_unknown_type_body
 
 Parses a C<FCGI_UnknownTypeBody>.
@@ -735,13 +854,15 @@ None by default. All functions can be exported using the C<:all> tag or individu
 
 =item B<(F)> Usage: %s
 
-=item B<(F)> Argument "%s" must be greater than or equal to %u octets in length
+Subroutine called with wrong number of arguments.
 
-=item B<(F)> Argument "%s" must be less than or equal to %u octets in length
+=item B<(F)> Invalid Argument: %s
 
-=item B<(F)> Unexpected end of octets while parsing FCGI_NameValuePair
+=item B<(F)> FastCGI: Insufficient number of octets to parse %s
 
-=item B<(F)> Unsupported FastCGI version: %u
+=item B<(F)> FastCGI: Malformed record %s
+
+=item B<(F)> FastCGI: Protocol version mismatch (0x%.2X)
 
 =back
 

@@ -1,10 +1,25 @@
-0.03 2010-01-23 22:01
+0.04 2010-01-30
+    - Added parse_record() and parse_record_body()
+      - Added tests for these
+      - Added docs (incomplete)
+    - Cleaned up exception messages. Protocol exceptions now have a FastCGI prefix
+    - Fixed parse_params() to correctly detect incomplete FCGI_NameValuePair's
+      - added tests for this
+    - Added tests for build_stream()
+    - Changed parse_header() to return a hash reference in scalar context
+      - added tests for this
+    - Coverage ~90% (stmt:100.0 bran:96.9 cond:92.9)
+      - More tests (and docs) needed to cover all cases
+
+0.03 2010-01-23
     - Fixed package loading in Net::FastCGI::Protocol
-0.02 2010-01-23 22:01
+
+0.02 2010-01-23
     - Removed object oriented implementation, it will eventually be released as
       a separate distribution with different prerequisites.
     - Removed unnecessary functions from Net::FastCGI::Protocol
     - Re-factored internals of Net::FastCGI::Protocol to be more performant.
     - No major changes planned for existing API in Net::FastCGI::Protocol
-0.01_01 2009-10-17 23:56
+
+0.01_01 2009-10-17
     - Initial release.

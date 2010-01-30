@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 use Test::BinaryData;
 use Test::Exception;
 
@@ -33,8 +33,9 @@ foreach my $test (@tests) {
     is_deeply(\@got, \@expected, "parse_unknown_type_body()");
 }
 
+
+throws_ok { parse_unknown_type_body("")    } qr/^^FastCGI: Insufficient .* FCGI_UnknownTypeBody/;
+throws_ok { parse_unknown_type_body(undef) } qr/^^FastCGI: Insufficient .* FCGI_UnknownTypeBody/;
+
 throws_ok { build_unknown_type_body() } qr/^Usage: /;
-
 throws_ok { parse_unknown_type_body() } qr/^Usage: /;
-
-throws_ok { parse_unknown_type_body("") } qr/^Argument 'octets' must be greater than or equal to/;

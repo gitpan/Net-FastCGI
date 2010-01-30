@@ -6,7 +6,7 @@ use Carp                   qw[croak];
 use Net::FastCGI::Constant qw[:all];
 
 BEGIN {
-    our $VERSION   = 0.03;
+    our $VERSION   = 0.04;
     our @EXPORT_OK = qw[ build_begin_request_body
                          build_begin_request_record
                          build_end_request_body
@@ -21,6 +21,8 @@ BEGIN {
                          parse_end_request_body
                          parse_header
                          parse_params
+                         parse_record
+                         parse_record_body
                          parse_unknown_type_body
                          is_known_type
                          is_management_type
@@ -36,10 +38,11 @@ BEGIN {
     *import = \&Exporter::import;
 }
 
-sub ERRMSG_VERSION   () { q/Unsupported FastCGI version: %u/ }
-sub ERRMSG_PARAMS    () { q/Unexpected end of octets while parsing FCGI_NameValuePair/ }
-sub ERRMSG_OCTETS_GE () { q/Argument '%s' must be greater than or equal to %u octets in length/ }
-sub ERRMSG_OCTETS_LE () { q/Argument '%s' must be less than or equal to %u octets in length/ }
+sub ERRMSG_OCTETS    () { q/FastCGI: Insufficient number of octets to parse %s/ }
+sub ERRMSG_MALFORMED () { q/FastCGI: Malformed record %s/ }
+sub ERRMSG_VERSION   () { q/FastCGI: Protocol version mismatch (0x%.2X)/ }
+sub ERRMSG_OCTETS_GE () { q/Invalid Argument: '%s' must be greater than or equal to %u octets in length/ }
+sub ERRMSG_OCTETS_LE () { q/Invalid Argument: '%s' must be less than or equal to %u octets in length/ }
 
 sub throw {
     @_ = ( sprintf($_[0], @_[1..$#_]) ) if @_ > 1;
@@ -56,10 +59,15 @@ sub build_header {
 sub parse_header {
     @_ == 1 || throw(q/Usage: parse_header(octets)/);
     (defined $_[0] && length $_[0] >= 8)
-      || throw(ERRMSG_OCTETS_GE, q/octets/, 8);
+      || throw(ERRMSG_OCTETS, q/FCGI_Header/, 8);
     (unpack('C', $_[0]) == FCGI_VERSION_1)
       || throw(ERRMSG_VERSION, unpack('C', $_[0]));
-    return unpack('xCnnCx', $_[0]);
+    return unpack('xCnnCx', $_[0])
+      if wantarray;
+    my %header; 
+       @header{qw(type request_id content_length padding_length)}
+         = unpack('xCnnCx', $_[0]);
+    return \%header;
 }
 
 # FCGI_BeginRequestBody
@@ -72,7 +80,7 @@ sub build_begin_request_body {
 sub parse_begin_request_body {
     @_ == 1 || throw(q/Usage: parse_begin_request_body(octets)/);
     (defined $_[0] && length $_[0] >= 8)
-      || throw(ERRMSG_OCTETS_GE, q/octets/, 8);
+      || throw(ERRMSG_OCTETS, q/FCGI_BeginRequestBody/, 8);
     return unpack(FCGI_BeginRequestBody, $_[0]);
 }
 
@@ -86,7 +94,7 @@ sub build_end_request_body {
 sub parse_end_request_body {
     @_ == 1 || throw(q/Usage: parse_end_request_body(octets)/);
     (defined $_[0] && length $_[0] >= 8)
-      || throw(ERRMSG_OCTETS_GE, q/octets/, 8);
+      || throw(ERRMSG_OCTETS, q/FCGI_EndRequestBody/, 8);
     return unpack(FCGI_EndRequestBody, $_[0]);
 }
 
@@ -100,7 +108,7 @@ sub build_unknown_type_body {
 sub parse_unknown_type_body {
     @_ == 1 || throw(q/Usage: parse_unknown_type_body(octets)/);
     (defined $_[0] && length $_[0] >= 8)
-      || throw(ERRMSG_OCTETS_GE, q/octets/, 8);
+      || throw(ERRMSG_OCTETS, q/FCGI_UnknownTypeBody/, 8);
     return unpack(FCGI_UnknownTypeBody, $_[0]);
 }
 
@@ -154,6 +162,67 @@ sub build_record {
     return $octets;
 }
 
+sub parse_record {
+    @_ == 1 || croak(q/Usage: parse_record(octets)/);
+    my ($type, $request_id, $content_length) = parse_header($_[0]);
+
+    (length $_[0] >= FCGI_HEADER_LEN + $content_length)
+      || throw(ERRMSG_OCTETS, q/FCGI_Record/);
+
+    return parse_record_body($type, $request_id,
+      substr($_[0], FCGI_HEADER_LEN, $content_length));
+}
+
+sub parse_record_body {
+    @_ == 3 || croak(q/Usage: parse_record_body(type, request_id, content)/);
+    my ($type, $request_id, $content) = @_;
+
+    my $content_length = defined $content ? length $content : 0;
+    my %record = (type => $type, request_id => $request_id);
+
+    if ($type == FCGI_BEGIN_REQUEST) {
+        ($request_id != FCGI_NULL_REQUEST_ID && $content_length == 8)
+          || throw(ERRMSG_MALFORMED, q/FCGI_BeginRequestRecord/);
+        @record{ qw(role flags) } = parse_begin_request_body($content);
+    }
+    elsif ($type == FCGI_ABORT_REQUEST) {
+        ($request_id != FCGI_NULL_REQUEST_ID && $content_length == 0)
+          || throw(ERRMSG_MALFORMED, q/FCGI_AbortRequestRecord/);
+    }
+    elsif ($type == FCGI_END_REQUEST) {
+        ($request_id != FCGI_NULL_REQUEST_ID && $content_length == 8)
+          || throw(ERRMSG_MALFORMED, q/FCGI_EndRequestRecord/);
+        @record{ qw(application_status protocol_status) } = parse_end_request_body($content);
+    }
+    elsif (   $type == FCGI_PARAMS
+           || $type == FCGI_STDIN
+           || $type == FCGI_STDOUT
+           || $type == FCGI_STDERR
+           || $type == FCGI_DATA) {
+        $record{content} = $content_length ? $content : '';
+    }
+    elsif (   $type == FCGI_GET_VALUES
+           || $type == FCGI_GET_VALUES_RESULT) {
+        ($request_id == FCGI_NULL_REQUEST_ID)
+          || throw(ERRMSG_MALFORMED, ($type == FCGI_GET_VALUES)
+                                       ? q/FCGI_GetValuesRecord/
+                                       : q/FCGI_GetValuesResultRecord/);
+        $record{values} = parse_params($content);
+    }
+    elsif ($type == FCGI_UNKNOWN_TYPE) {
+        ($request_id == FCGI_NULL_REQUEST_ID && $content_length == 8)
+          || throw(ERRMSG_MALFORMED, q/FCGI_UnknownTypeRecord/);
+        $record{unknown_type} = parse_unknown_type_body($content);
+    }
+    else {
+        # unknown record type, pass content so caller can decide on appropriate action
+        $record{content} = $content if $content_length;
+    }
+
+    return \%record;
+}
+
+# This is what the reference implementation use (libfcgi)
 sub FCGI_CONTENT_LEN () { 8192 - FCGI_HEADER_LEN }
 
 sub build_stream {
@@ -162,7 +231,7 @@ sub build_stream {
 
     my $remain = defined $octets ? length $octets : 0;
     my $length;
-    my $stream;
+    my $stream = '';
 
     while ($remain) {
         $length = ($remain > FCGI_CONTENT_LEN) ? FCGI_CONTENT_LEN : $remain;
@@ -204,18 +273,19 @@ sub parse_params {
     my ($klen, $vlen);
     while (length $octets) {
         for ($klen, $vlen) {
-            last if 1 > length $octets;
+            (1 <= length $octets)
+              || throw(ERRMSG_OCTETS, q/FCGI_NameValuePair/);
             $_ = unpack('C', substr($octets, 0, 1, ''));
             next if $_ < 0x80;
-            last if 3 > length $octets;
+            (3 <= length $octets)
+              || throw(ERRMSG_OCTETS, q/FCGI_NameValuePair/);
             $_ = unpack('N', pack('C', $_ & 0x7F) . substr($octets, 0, 3, ''));
         }
-        last if $klen + $vlen > length $octets;
+        ($klen + $vlen <= length $octets)
+          || throw(ERRMSG_OCTETS, q/FCGI_NameValuePair/);
         my $key = substr($octets, 0, $klen, '');
         $params->{$key} = substr($octets, 0, $vlen, '');
     }
-    (length $octets == 0)
-      || throw(ERRMSG_PARAMS);
     return $params;
 }
 
