@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 43;
+use Test::More tests => 46;
 use Test::Exception;
 
 BEGIN {
@@ -33,8 +33,12 @@ BEGIN {
         FCGI_MAXTYPE,
     );
 
-    foreach my $type ( @known ) {
+    foreach my $type (@known) {
         is( is_known_type($type), !!1, qq/is_known_type($type) = true/ );
+    }
+    
+    foreach my $type (-10, 0, 12) {
+        is( is_known_type($type), !!0, qq/is_known_type($type) = false/ );
     }
 }
 
@@ -61,7 +65,7 @@ BEGIN {
         FCGI_UNKNOWN_TYPE,
     );
 
-    foreach my $type ( @management ) {
+    foreach my $type (@management) {
         is( is_management_type($type), !!1, qq/is_management_type($type) = true/ );
     }
 }
@@ -75,7 +79,7 @@ BEGIN {
         FCGI_DATA,
     );
 
-    foreach my $type ( @stream ) {
+    foreach my $type (@stream) {
         is( is_stream_type($type),   !!1, qq/is_stream_type($type) = true/    );
         is( is_discrete_type($type), !!0, qq/is_discrete_type($type) = false/ );
     }

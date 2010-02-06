@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 30;
+use Test::More tests => 37;
 use Test::BinaryData;
 use Test::Exception;
 
@@ -95,6 +95,11 @@ my @records_ok = (
         request_id => 222,
         content    => 'oops' }
     ],
+    [
+      "\x01\xFF\xFF\xFF\x00\x00\x00\x00",
+      { type       => 0xFF,
+        request_id => 0xFFFF }
+    ],
 );
 
 foreach my $test (@records_ok) {
@@ -110,14 +115,24 @@ my @headers_malformed = (
     [ FCGI_ABORT_REQUEST,     0, 0, 0 ],
     [ FCGI_END_REQUEST,       0, 0, 0 ],
     [ FCGI_END_REQUEST,       1, 0, 0 ],
+    [ FCGI_PARAMS,            0, 0, 0 ],
+    [ FCGI_STDIN,             0, 0, 0 ],
+    [ FCGI_STDOUT,            0, 0, 0 ],
+    [ FCGI_STDERR,            0, 0, 0 ],
+    [ FCGI_DATA,              0, 0, 0 ],
     [ FCGI_GET_VALUES,        1, 0, 0 ],
     [ FCGI_GET_VALUES_RESULT, 1, 0, 0 ],
     [ FCGI_UNKNOWN_TYPE,      0, 0, 0 ],
-    [ FCGI_UNKNOWN_TYPE,      1, 0, 0 ],
+    [ FCGI_UNKNOWN_TYPE,      1, 0, 0 ]
 );
 
 foreach my $test (@headers_malformed) {
     my $octets = build_header(@$test);
+    throws_ok { parse_record($octets) } qr/^FastCGI: Malformed/;
+}
+
+{
+    my $octets = build_header(FCGI_ABORT_REQUEST, 1, 8, 0) . "\x00" x 8;
     throws_ok { parse_record($octets) } qr/^FastCGI: Malformed/;
 }
 

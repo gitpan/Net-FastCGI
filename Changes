@@ -1,3 +1,21 @@
+0.05 2010-02-06
+    - Net::FastCGI::Constant
+      - Improved documentation
+      - Added @FCGI_TYPE_NAME, @FCGI_ROLE_NAME and @FCGI_PROTOCOL_STATUS_NAME
+        - Re-factored Net::FastCGI::Protocol to use these.
+      - Renamed FCGI_MAX_LEN to FCGI_MAX_CONTENT_LEN
+        - FCGI_MAX_LEN is deprecated and will be removed in a future version.
+    - Net::FastCGI::Protocol
+      - Fixed parse_record() and parse_record_body() to properly detect malformed
+        stream records.
+        - Added tests for this.
+      - Increased segment size in build_stream() from 8192 to 32760 to reflect modern
+        socket buffers.
+        - Updated tests
+        - Documented segment size
+      - Documented scalar return value of parse_header()
+      - Minor documentation updates
+
 0.04 2010-01-30
     - Added parse_record() and parse_record_body()
       - Added tests for these

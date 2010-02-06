@@ -7,6 +7,7 @@ Net::FastCGI::Protocol - Provides functions to build and parse FastCGI messages.
     # FCGI_Header
     $octets = build_header($type, $request_id, $content_length, $padding_length);
     @values = parse_header($octets);
+    $header = parse_header($octets);
     
     # FCGI_BeginRequestBody
     $octets = build_begin_request_body($role, $flags);
@@ -36,7 +37,6 @@ Net::FastCGI::Protocol - Provides functions to build and parse FastCGI messages.
     # FCGI_Record
     $octets = build_record($type, $request_id);
     $octets = build_record($type, $request_id, $content);
-    
     $record = parse_record($octets);
     $record = parse_record_body($type, $request_id, $content);
     
@@ -275,7 +275,7 @@ An unsigned 16-bit integer.
 
 =item C<$content> (optional)
 
-A string of octets containing the content, must be less than or equal to 65535 octets in length.
+A string of octets containing the content, cannot exceed 65535 octets in length. May be C<undef>.
 
 =back
 
@@ -288,6 +288,11 @@ I<Returns>
 A string of octets containing the record.
 
 =back
+
+I<Note>
+
+Follows the recommendation in specification and pads the record by 
+8-(content_length mod 8) zero-octets.
 
 =head2 build_stream
 
@@ -312,11 +317,12 @@ An unsigned 16-bit integer.
 
 =item C<$content>
 
-A string of octets containing the stream content.
+A string of octets containing the stream content. May be C<undef>.
 
-=item C<$terminate>
+=item C<$terminate> (optional)
 
 A boolean indicating whether or not the stream should be terminated.
+Defaults to false.
 
 =back
 
@@ -329,6 +335,12 @@ I<Returns>
 A string of octets containing the stream.
 
 =back
+
+I<Note>
+
+Stream is not terminated if C<$content> is C<undef> or empty unless C<$terminate> is set.
+
+C<$content> is split in segment sizes of 32760 octets (32768 - FCGI_HEADER_LEN).
 
 =head2 build_unknown_type_body
 
@@ -456,7 +468,12 @@ Parses a C<FCGI_Header>.
 
 I<Usage>
 
-    ($type, $request_id, $content_length, $padding_length) = parse_header($octets);
+    ($type, $request_id, $content_length, $padding_length)
+      = parse_header($octets);
+    
+    $header = parse_header($octets);
+    print $header->{type};
+    print $header->{request_id};
 
 I<Arguments>
 
@@ -469,6 +486,8 @@ A string of octets containing the header, must be greater than or equal to 8 oct
 =back
 
 I<Returns>
+
+In list context:
 
 =over 4
 
@@ -489,6 +508,8 @@ An unsigned 16-bit integer.
 An unsigned 8-bit integer.
 
 =back
+
+In scalar context a hash reference containing above variable names as keys.
 
 =head2 parse_params
 
@@ -538,8 +559,8 @@ A string of octets containing at least one record.
 
 I<Returns>
 
-A hash reference containing the keys C<type> and C<request_id> and
-following depending on the record type:
+A hash reference which represents the record. The content depends on the
+type of record. All record types have the keys: C<type> and C<request_id>.
 
 =over 4
 
@@ -577,7 +598,7 @@ following depending on the record type:
 
 =item C<content>
 
-A string of octets containing the content component of the stream.
+A string of octets containing the content of the stream. Can be empty but not C<undef>.
 
 =back
 
@@ -631,7 +652,7 @@ A string of octets containing the record content.
 
 I<Returns>
 
-Returns a hash reference containing the C<FCG_Record> components.
+Returns a hash reference containing the C<FCGI_Record> components.
 See L</parse_record>.
 
 =head2 parse_unknown_type_body

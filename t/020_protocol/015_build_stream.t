@@ -19,17 +19,17 @@ sub FALSE () { !!0 }
 
 my @tests = (
     # expected,                             type, request_id, content, terminate
-    [ "",                                      1,          1,      '',         0 ],
-    [ "",                                      1,          1,   undef,         0 ],
-    [ "\x01\x01\x00\x01\x00\x00\x00\x00",      1,          1,      '',         1 ],
-    [ "\x01\x01\x00\x01\x00\x00\x00\x00",      1,          1,   undef,         1 ],
+    [ "",                                      1,          1,      '',     FALSE ],
+    [ "",                                      1,          1,   undef,     FALSE ],
+    [ "\x01\x01\x00\x01\x00\x00\x00\x00",      1,          1,      '',      TRUE ],
+    [ "\x01\x01\x00\x01\x00\x00\x00\x00",      1,          1,   undef,      TRUE ],
 
     [ "\x01\x01\x00\x01\x00\x03\x05\x00"
-    . "FOO\x00\x00\x00\x00\x00",               1,          1,   'FOO',         0 ],
+    . "FOO\x00\x00\x00\x00\x00",               1,          1,   'FOO',     FALSE ],
 
     [ "\x01\x01\x00\x01\x00\x03\x05\x00"
     . "FOO\x00\x00\x00\x00\x00"
-    . "\x01\x01\x00\x01\x00\x00\x00\x00",      1,          1,   'FOO',         1 ],
+    . "\x01\x01\x00\x01\x00\x00\x00\x00",      1,          1,   'FOO',      TRUE ],
 );
 
 foreach my $test (@tests) {
@@ -39,42 +39,42 @@ foreach my $test (@tests) {
 }
 
 {
-    my $header  = "\x01\x01\x00\x01\x1F\xF8\x00\x00";
-    my $content = "x" x 8184;
+    my $header  = "\x01\x01\x00\x01\x7F\xF8\x00\x00";
+    my $content = "x" x 32760;
     my $trailer = "\x01\x01\x00\x01\x00\x00\x00\x00";
 
     {
         my $expected = $header . $content;
         my $got      = build_stream(1,1, $content);
-        is_binary($got, $expected, 'build_stream(content_length: 8184 terminate:false)');
+        is_binary($got, $expected, 'build_stream(content_length: 32760 terminate:false)');
     }
 
     {
         my $expected = $header . $content . $trailer;
         my $got      = build_stream(1,1, $content, 1);
-        is_binary($got, $expected, 'build_stream(content_length: 8184 terminate:true)');
+        is_binary($got, $expected, 'build_stream(content_length: 32760 terminate:true)');
     }
 }
 
 {
-    my $records = "\x01\x01\x00\x01\x1F\xF8\x00\x00" #  H1
-                . "x" x 8184                         #  C1
+    my $records = "\x01\x01\x00\x01\x7F\xF8\x00\x00" #  H1
+                . "x" x 32760                        #  C1
                 . "\x01\x01\x00\x01\x00\x08\x00\x00" #  H2
                 . "x" x 8                            #  C2
                 ;
-    my $content = "x" x 8192;
+    my $content = "x" x 32768;
     my $trailer = "\x01\x01\x00\x01\x00\x00\x00\x00";
 
     {
         my $expected = $records;
         my $got      = build_stream(1,1, $content);
-        is_binary($got, $records, 'build_stream(content_length: 8192 terminate:false)');
+        is_binary($got, $records, 'build_stream(content_length: 32768 terminate:false)');
     }
 
     {
         my $expected = $records . $trailer;
         my $got      = build_stream(1,1, $content, 1);
-        is_binary($got, $expected, 'build_stream(content_length: 8192 terminate:true)');
+        is_binary($got, $expected, 'build_stream(content_length: 32768 terminate:true)');
     }
 }
 

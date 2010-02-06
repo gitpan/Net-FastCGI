@@ -6,7 +6,7 @@ use Carp                   qw[croak];
 use Net::FastCGI::Constant qw[:all];
 
 BEGIN {
-    our $VERSION   = 0.04;
+    our $VERSION   = 0.05;
     our @EXPORT_OK = qw[ build_begin_request_body
                          build_begin_request_record
                          build_end_request_body
@@ -146,8 +146,8 @@ sub build_record {
     my $content_length = defined $_[2] ? length $_[2] : 0;
     my $padding_length = (8 - ($content_length % 8)) % 8;
 
-    ($content_length <= 0xFFFF)
-      || throw(ERRMSG_OCTETS_LE, q/content/, 0xFFFF);
+    ($content_length <= FCGI_MAX_CONTENT_LEN)
+      || throw(ERRMSG_OCTETS_LE, q/content/, FCGI_MAX_CONTENT_LEN);
 
     my $octets = build_header($type, $request_id, $content_length, $padding_length);
 
@@ -192,21 +192,22 @@ sub parse_record_body {
     elsif ($type == FCGI_END_REQUEST) {
         ($request_id != FCGI_NULL_REQUEST_ID && $content_length == 8)
           || throw(ERRMSG_MALFORMED, q/FCGI_EndRequestRecord/);
-        @record{ qw(application_status protocol_status) } = parse_end_request_body($content);
+        @record{ qw(application_status protocol_status) } 
+          = parse_end_request_body($content);
     }
     elsif (   $type == FCGI_PARAMS
            || $type == FCGI_STDIN
            || $type == FCGI_STDOUT
            || $type == FCGI_STDERR
            || $type == FCGI_DATA) {
+        ($request_id != FCGI_NULL_REQUEST_ID)
+          || throw(ERRMSG_MALFORMED, $FCGI_RECORD_NAME[$type]);
         $record{content} = $content_length ? $content : '';
     }
     elsif (   $type == FCGI_GET_VALUES
            || $type == FCGI_GET_VALUES_RESULT) {
         ($request_id == FCGI_NULL_REQUEST_ID)
-          || throw(ERRMSG_MALFORMED, ($type == FCGI_GET_VALUES)
-                                       ? q/FCGI_GetValuesRecord/
-                                       : q/FCGI_GetValuesResultRecord/);
+          || throw(ERRMSG_MALFORMED, $FCGI_RECORD_NAME[$type]);
         $record{values} = parse_params($content);
     }
     elsif ($type == FCGI_UNKNOWN_TYPE) {
@@ -215,15 +216,15 @@ sub parse_record_body {
         $record{unknown_type} = parse_unknown_type_body($content);
     }
     else {
-        # unknown record type, pass content so caller can decide on appropriate action
+        # unknown record type, pass content so caller can decide appropriate action
         $record{content} = $content if $content_length;
     }
 
     return \%record;
 }
 
-# This is what the reference implementation use (libfcgi)
-sub FCGI_CONTENT_LEN () { 8192 - FCGI_HEADER_LEN }
+# Reference implementation use 8192 (libfcgi)
+sub FCGI_SEGMENT_LEN () { 32768 - FCGI_HEADER_LEN }
 
 sub build_stream {
     @_ == 3 || @_ == 4 || throw(q/Usage: build_stream(type, request_id, octets [, terminate])/);
@@ -234,7 +235,7 @@ sub build_stream {
     my $stream = '';
 
     while ($remain) {
-        $length = ($remain > FCGI_CONTENT_LEN) ? FCGI_CONTENT_LEN : $remain;
+        $length = ($remain > FCGI_SEGMENT_LEN) ? FCGI_SEGMENT_LEN : $remain;
         $stream .= build_record($type, $request_id, substr($octets, 0, $length, ''));
         $remain -= $length;
     }
@@ -265,12 +266,10 @@ sub parse_params {
     @_ == 1 || throw(q/Usage: parse_params(params)/);
     my ($octets) = @_;
 
-    my $params = {};
+    (defined $octets)
+      || return +{};
 
-    (defined $octets && length $octets > 0)
-      || return $params;
-
-    my ($klen, $vlen);
+    my ($params, $klen, $vlen) = ({}, 0, 0);
     while (length $octets) {
         for ($klen, $vlen) {
             (1 <= length $octets)
@@ -324,58 +323,22 @@ sub is_stream_type {
             || $type == FCGI_DATA );
 }
 
-{
-    my @NAME;
-       $NAME[FCGI_BEGIN_REQUEST]     = 'FCGI_BEGIN_REQUEST';
-       $NAME[FCGI_ABORT_REQUEST]     = 'FCGI_ABORT_REQUEST';
-       $NAME[FCGI_END_REQUEST]       = 'FCGI_END_REQUEST';
-       $NAME[FCGI_PARAMS]            = 'FCGI_PARAMS';
-       $NAME[FCGI_STDIN]             = 'FCGI_STDIN';
-       $NAME[FCGI_STDOUT]            = 'FCGI_STDOUT';
-       $NAME[FCGI_STDERR]            = 'FCGI_STDERR';
-       $NAME[FCGI_DATA]              = 'FCGI_DATA';
-       $NAME[FCGI_GET_VALUES]        = 'FCGI_GET_VALUES';
-       $NAME[FCGI_GET_VALUES_RESULT] = 'FCGI_GET_VALUES_RESULT';
-       $NAME[FCGI_UNKNOWN_TYPE]      = 'FCGI_UNKNOWN_TYPE';
-
-    sub get_type_name {
-        @_ == 1 || throw(q/Usage: get_type_name(type)/);
-        my ($type) = @_;
-        return exists($NAME[$type])
-          ? $NAME[$type]
-          : sprintf('UNKNOWN (0x%.2X)', $type);
-    }
+sub get_type_name {
+    @_ == 1 || throw(q/Usage: get_type_name(type)/);
+    my ($type) = @_;
+    return $FCGI_TYPE_NAME[$type] || sprintf('UNKNOWN (0x%.2X)', $type);
 }
 
-{
-    my @NAME;
-       $NAME[FCGI_RESPONDER]  = 'FCGI_RESPONDER';
-       $NAME[FCGI_AUTHORIZER] = 'FCGI_AUTHORIZER';
-       $NAME[FCGI_FILTER]     = 'FCGI_FILTER';
-
-    sub get_role_name {
-        @_ == 1 || throw(q/Usage: get_role_name(role)/);
-        my ($role) = @_;
-        return exists($NAME[$role])
-          ? $NAME[$role]
-          : sprintf('UNKNOWN (0x%.4X)', $role);
-    }
+sub get_role_name {
+    @_ == 1 || throw(q/Usage: get_role_name(role)/);
+    my ($role) = @_;
+    return $FCGI_ROLE_NAME[$role] || sprintf('UNKNOWN (0x%.4X)', $role);
 }
 
-{
-    my @NAME;
-       $NAME[FCGI_REQUEST_COMPLETE]  = 'FCGI_REQUEST_COMPLETE';
-       $NAME[FCGI_CANT_MPX_CONN]     = 'FCGI_CANT_MPX_CONN';
-       $NAME[FCGI_OVERLOADED]        = 'FCGI_OVERLOADED';
-       $NAME[FCGI_UNKNOWN_ROLE]      = 'FCGI_UNKNOWN_ROLE';
-
-    sub get_protocol_status_name {
-        @_ == 1 || throw(q/Usage: get_protocol_status_name(protocol_status)/);
-        my ($protocol_status) = @_;
-        return exists($NAME[$protocol_status])
-          ? $NAME[$protocol_status]
-          : sprintf('UNKNOWN (0x%.2X)', $protocol_status);
-    }
+sub get_protocol_status_name {
+    @_ == 1 || throw(q/Usage: get_protocol_status_name(protocol_status)/);
+    my ($status) = @_;
+    return $FCGI_PROTOCOL_STATUS_NAME[$status] || sprintf('UNKNOWN (0x%.2X)', $status);
 }
 
 1;
