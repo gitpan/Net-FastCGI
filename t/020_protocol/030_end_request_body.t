@@ -16,9 +16,9 @@ BEGIN {
 }
 
 my @tests = (
-    # octets                              application_status  protocol_status
-    [ "\x00\x00\x00\x00\x00\x00\x00\x00",                  0,               0 ],
-    [ "\xFF\xFF\xFF\xFF\xFF\x00\x00\x00",         0xFFFFFFFF,            0xFF ],
+    # octets                                app_status  protocol_status
+    [ "\x00\x00\x00\x00\x00\x00\x00\x00",            0,               0 ],
+    [ "\xFF\xFF\xFF\xFF\xFF\x00\x00\x00",   0xFFFFFFFF,            0xFF ],
 );
 
 foreach my $test (@tests) {
@@ -39,3 +39,4 @@ throws_ok { parse_end_request_body(undef) } qr/^FastCGI: Insufficient .* FCGI_En
 
 throws_ok { build_end_request_body() } qr/^Usage: /;
 throws_ok { parse_end_request_body() } qr/^Usage: /;
+

@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 22;
+use Test::More tests => 24;
 use Test::BinaryData;
 use Test::Exception;
 
@@ -16,10 +16,11 @@ BEGIN {
 }
 
 my @tests = (
-    # octets                                                  params
+    # octets                                               params
+    [ "",                                                  { }                               ],
     [ "\x00\x00",                                          { '' => '' },                     ],
     [ "\x01\x01\x31\x31",                                  {  1 =>  1 },                     ],
-    [ "\x01\x01\x41\x42\x01\x01\x43\x44\x01\x01\x45\x46",  {  A => 'B', C => 'D', E => 'F' } ]
+    [ "\x01\x01\x41\x42\x01\x01\x43\x44\x01\x01\x45\x46",  {  A => 'B', C => 'D', E => 'F' } ],
 );
 
 foreach my $test (@tests) {
@@ -40,7 +41,7 @@ foreach my $test (@tests) {
     is_deeply($got, $expected, 'parse_params()');
 }
 
-my @truncated = (
+my @insufficient = (
     "\x00",
     "\x01",
     "\x00\x01",
@@ -51,9 +52,10 @@ my @truncated = (
     "\x80\x00\x00\x80\x00",
 );
 
-foreach my $test (@truncated) {
+foreach my $test (@insufficient) {
     throws_ok { parse_params($test) } qr/^FastCGI: Insufficient .* FCGI_NameValuePair/;
 }
 
 throws_ok { build_params() } qr/^Usage: /;
 throws_ok { parse_params() } qr/^Usage: /;
+

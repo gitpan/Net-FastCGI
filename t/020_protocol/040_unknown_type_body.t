@@ -39,3 +39,4 @@ throws_ok { parse_unknown_type_body(undef) } qr/^^FastCGI: Insufficient .* FCGI_
 
 throws_ok { build_unknown_type_body() } qr/^Usage: /;
 throws_ok { parse_unknown_type_body() } qr/^Usage: /;
+

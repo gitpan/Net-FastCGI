@@ -25,11 +25,14 @@ t/020_protocol/010_build_record.t
 t/020_protocol/015_build_stream.t
 t/020_protocol/020_begin_request_body.t
 t/020_protocol/025_begin_request_record.t
+t/020_protocol/027_begin_request.t
 t/020_protocol/030_end_request_body.t
 t/020_protocol/035_end_request_record.t
+t/020_protocol/037_end_request.t
 t/020_protocol/040_unknown_type_body.t
 t/020_protocol/045_unknown_type_record.t
 t/020_protocol/050_parse_record.t
+t/020_protocol/055_parse_record_body.t
 t/020_protocol/060_params.t
 t/020_protocol/065_record_type.t
 t/020_protocol/070_names.t

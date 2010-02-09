@@ -77,3 +77,4 @@ BEGIN {
 throws_ok { get_type_name()              } qr/^Usage: /;
 throws_ok { get_role_name()              } qr/^Usage: /;
 throws_ok { get_protocol_status_name()   } qr/^Usage: /;
+

@@ -6,9 +6,11 @@ use Carp                   qw[croak];
 use Net::FastCGI::Constant qw[:all];
 
 BEGIN {
-    our $VERSION   = 0.05;
-    our @EXPORT_OK = qw[ build_begin_request_body
+    our $VERSION   = 0.06;
+    our @EXPORT_OK = qw[ build_begin_request
+                         build_begin_request_body
                          build_begin_request_record
+                         build_end_request
                          build_end_request_body
                          build_end_request_record
                          build_header
@@ -87,7 +89,7 @@ sub parse_begin_request_body {
 # FCGI_EndRequestBody
 
 sub build_end_request_body {
-    @_ == 2 || throw(q/Usage: build_end_request_body(application_status, protocol_status)/);
+    @_ == 2 || throw(q/Usage: build_end_request_body(app_status, protocol_status)/);
     return pack(FCGI_EndRequestBody, @_);
 }
 
@@ -124,10 +126,10 @@ sub build_begin_request_record {
 # FCGI_EndRequestRecord
 
 sub build_end_request_record {
-    @_ == 3 || throw(q/Usage: build_end_request_record(request_id, application_status, protocol_status)/);
-    my ($request_id, $application_status, $protocol_status) = @_;
+    @_ == 3 || throw(q/Usage: build_end_request_record(request_id, app_status, protocol_status)/);
+    my ($request_id, $app_status, $protocol_status) = @_;
     return build_record(FCGI_END_REQUEST, $request_id,
-         build_end_request_body($application_status, $protocol_status));
+         build_end_request_body($app_status, $protocol_status));
 }
 
 # FCGI_UnknownTypeRecord
@@ -192,7 +194,7 @@ sub parse_record_body {
     elsif ($type == FCGI_END_REQUEST) {
         ($request_id != FCGI_NULL_REQUEST_ID && $content_length == 8)
           || throw(ERRMSG_MALFORMED, q/FCGI_EndRequestRecord/);
-        @record{ qw(application_status protocol_status) } 
+        @record{ qw(app_status protocol_status) } 
           = parse_end_request_body($content);
     }
     elsif (   $type == FCGI_PARAMS
@@ -241,7 +243,7 @@ sub build_stream {
     }
 
     if ($terminate) {
-        $stream .= build_record($type, $request_id);
+        $stream .= build_header($type, $request_id, 0, 0);
     }
 
     return $stream;
@@ -286,6 +288,37 @@ sub parse_params {
         $params->{$key} = substr($octets, 0, $vlen, '');
     }
     return $params;
+}
+
+sub build_begin_request {
+    (@_ >= 4 && @_ <= 6) || throw(q/Usage: build_begin_request(request_id, role, flags, params [, stdin [, data]])/);
+    my ($request_id, $role, $flags, $params) = @_;
+
+    my $r = build_begin_request_record($request_id, $role, $flags)
+          . build_stream(FCGI_PARAMS, $request_id, build_params($params), 1);
+
+    if (@_ > 4) {
+        $r .= build_stream(FCGI_STDIN, $request_id, $_[4], 1);
+        if (@_ > 5) {
+            $r .= build_stream(FCGI_DATA, $request_id, $_[5], 1);
+        }
+    }
+    return $r;
+}
+
+sub build_end_request {
+    (@_ >= 3 && @_ <= 5) || throw(q/Usage: build_end_request(request_id, app_status, protocol_status [, stdout [, stderr]])/);
+    my ($request_id, $app_status, $protocol_status) = @_;
+
+    my $r;
+    if (@_ > 3) {
+        $r .= build_stream(FCGI_STDOUT, $request_id, $_[3], 1);
+        if (@_ > 4) {
+            $r .= build_stream(FCGI_STDERR, $request_id, $_[4], 1);
+        }
+    }
+    $r .= build_end_request_record($request_id, $app_status, $protocol_status);
+    return $r;
 }
 
 sub is_known_type {

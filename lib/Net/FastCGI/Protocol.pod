@@ -14,7 +14,7 @@ Net::FastCGI::Protocol - Provides functions to build and parse FastCGI messages.
     @values = parse_begin_request_body($octets);
     
     # FCGI_EndRequestBody
-    $octets = build_end_request_body($application_status, $protocol_status);
+    $octets = build_end_request_body($app_status, $protocol_status);
     @values = parse_end_request_body($octets);
     
     # FCGI_UnknownTypeBody
@@ -25,7 +25,7 @@ Net::FastCGI::Protocol - Provides functions to build and parse FastCGI messages.
     $octets = build_begin_request_record($request_id, $role, $flags);
     
     # FCGI_EndRequestRecord
-    $octets = build_end_request_record($request_id, $application_status, $protocol_status);
+    $octets = build_end_request_record($request_id, $app_status, $protocol_status);
     
     # FCGI_UnknownTypeRecord
     $octets = build_unknown_type_record($type);
@@ -40,15 +40,81 @@ Net::FastCGI::Protocol - Provides functions to build and parse FastCGI messages.
     $record = parse_record($octets);
     $record = parse_record_body($type, $request_id, $content);
     
-    # FCGI Stream
+    # Stream
     $octets = build_stream($type, $request_id, $octets);
     $octets = build_stream($type, $request_id, $octets, $terminate);
+    
+    # Begin Request
+    $octets = build_begin_request($request_id, $role, $flags, $params);
+    $octets = build_begin_request($request_id, $role, $flags, $params, $stdin);
+    $octets = build_begin_request($request_id, $role, $flags, $params, $stdin, $data);
+    
+    # End Request
+    $octets = build_end_request($request_id, $app_status, $protocol_status);
+    $octets = build_end_request($request_id, $app_status, $protocol_status, $stdout);
+    $octets = build_end_request($request_id, $app_status, $protocol_status, $stdout, $stderr);
 
 =head1 DESCRIPTION
 
 Provides functions to build and parse FastCGI messages.
 
 =head1 FUNCTIONS
+
+=head2 build_begin_request
+
+Builds a Begin Request message.
+
+I<Usage>
+
+    $octets = build_begin_request($request_id, $role, $flags, $params);
+    $octets = build_begin_request($request_id, $role, $flags, $params, $stdin);
+    $octets = build_begin_request($request_id, $role, $flags, $params, $stdin, $data);
+
+I<Arguments>
+
+=over 4
+
+=item C<$request_id>
+
+An unsigned 16-bit integer. ID of the request.
+
+=item C<$role>
+
+An unsigned 16-bit integer. This should be set to either C<FCGI_RESPONDER>,
+C<FCGI_AUTHORIZER> or C<FCGI_FILTER>.
+
+=item C<$flags>
+
+An unsigned 8-bit integer. This should be set to either C<0> or contain the 
+mask C<FCGI_KEEP_CONN> if a persistent connection is desired.
+
+=item C<$params>
+
+A hash reference containing name/value pairs. Typically this is the CGI environ 
+that the application expects.
+
+=item C<$stdin> (optional)
+
+A string of octets containing the C<FCGI_STDIN> data. This should only be provided if 
+C<$role> is set to either C<FCGI_RESPONDER> or C<FCGI_FILTER>. Maybe C<undef> or empty. 
+Stream is terminated if provided.
+
+=item C<$data> (optional)
+
+A string of octets containing the C<FCGI_DATA> data. This should only be provided if 
+C<$role> is set to C<FCGI_FILTER>. Maybe C<undef> or empty. Stream is terminated if provided.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the begin request message.
+
+=back
 
 =head2 build_begin_request_body
 
@@ -118,19 +184,73 @@ A string of octets containing the record. String is 16 octets in length.
 
 =back
 
+=head2 build_end_request
+
+Builds a End Request message
+
+I<Usage>
+
+    $octets = build_end_request($request_id, $app_status, $protocol_status);
+    $octets = build_end_request($request_id, $app_status, $protocol_status, $stdout);
+    $octets = build_end_request($request_id, $app_status, $protocol_status, $stdout, $stderr);
+
+I<Arguments>
+
+=over 4
+
+=item C<$request_id>
+
+An unsigned 16-bit integer. ID of the request.
+
+=item C<$app_status>
+
+An unsigned 32-bit integer. Application status code of the request.
+
+=item C<$protocol_status>
+
+An unsigned 8-bit integer. This should be set to either C<FCGI_REQUEST_COMPLETE>,
+C<FCGI_CANT_MPX_CONN>, C<FCGI_OVERLOADED> or C<FCGI_UNKNOWN_ROLE>.
+
+=item C<$stdout> (optional)
+
+A string of octets containing the C<FCGI_STDOUT> data. Maybe C<undef> or empty. 
+Stream is terminated if provided.
+
+=item C<$stderr> (optional)
+
+A string of octets containing the C<FCGI_STDERR> data. Maybe C<undef> or empty.
+Stream is terminated if provided.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing the end request message.
+
+=back
+
+I<Note>
+
+This function is equivalent to C<build_end_request_record()> if called without
+C<$stdout> and C<$stderr>.
+
 =head2 build_end_request_body
 
 Builds a C<FCGI_EndRequestBody>.
 
 I<Usage>
 
-    $octets = build_end_request_body($application_status, $protocol_status);
+    $octets = build_end_request_body($app_status, $protocol_status);
 
 I<Arguments>
 
 =over 4
 
-=item C<$application_status>
+=item C<$app_status>
 
 An unsigned 32-bit integer.
 
@@ -156,7 +276,7 @@ Builds a C<FCGI_EndRequestRecord>.
 
 I<Usage>
 
-    $octets = build_end_request_record($request_id, $application_status, $protocol_status);
+    $octets = build_end_request_record($request_id, $app_status, $protocol_status);
 
 I<Arguments>
 
@@ -166,7 +286,7 @@ I<Arguments>
 
 An unsigned 16-bit integer.
 
-=item C<$application_status>
+=item C<$app_status>
 
 An unsigned 32-bit integer.
 
@@ -436,7 +556,7 @@ Parses a C<FCGI_EndRequestBody>.
 
 I<Usage>
 
-    ($application_status, $protocol_status) = parse_end_request_body($octets);
+    ($app_status, $protocol_status) = parse_end_request_body($octets);
 
 I<Arguments>
 
@@ -452,7 +572,7 @@ I<Returns>
 
 =over 4
 
-=item C<$application_status>
+=item C<$app_status>
 
 An unsigned 32-bit integer.
 
@@ -578,7 +698,7 @@ type of record. All record types have the keys: C<type> and C<request_id>.
 
 =over 8
 
-=item C<application_status>
+=item C<app_status>
 
 =item C<protocol_status>
 

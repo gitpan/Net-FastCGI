@@ -142,7 +142,7 @@ C<'nCx5'> (8 octets)
 
 C<'NCx3'> (8 octets)
 
-    my ($application_status, $protocol_status) 
+    my ($app_status, $protocol_status) 
       = unpack(FCGI_EndRequestBody, $octets);
 
 =item C<FCGI_UnknownTypeBody> 

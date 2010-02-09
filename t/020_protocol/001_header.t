@@ -48,3 +48,4 @@ throws_ok { parse_header("\xFF\x00\x00\x00\x00\x00\x00\x00") } qr/^FastCGI: Prot
 
 throws_ok { build_header() } qr/^Usage: /;
 throws_ok { parse_header() } qr/^Usage: /;
+

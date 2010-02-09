@@ -27,3 +27,4 @@ foreach my $test (@tests) {
 }
 
 throws_ok { build_unknown_type_record() } qr/^Usage: /;
+

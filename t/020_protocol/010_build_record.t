@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 8;
+use Test::More tests => 11;
 use Test::BinaryData;
 use Test::Exception;
 
@@ -29,7 +29,16 @@ foreach my $test (@tests) {
     is_binary($got, $expected, 'build_record()');
 }
 
+{
+    my $exp = "\x01\x01\x00\x02\x00\x00\x00\x00";
+    my $got = build_record(1, 2);
+    is_binary($got, $exp, 'build_record(1, 2)');
+}
+
 throws_ok { build_record( 0, 0, "\x00" x (0xFFFF + 1) ) } qr/^Invalid Argument: 'content' must be less than or equal to/;
 
-throws_ok { build_record() } qr/^Usage: /;
+# build_record(type, request_id [, content])
+for (0..1, 4) {
+    throws_ok { build_record((1) x $_) } qr/^Usage: /;
+}
 

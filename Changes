@@ -1,3 +1,10 @@
+0.06 2010-02-09
+    - NOTE: Changed application_status to app_status, this only affects users of
+      parse_record() or parse_record_body(). Former was unnecessarily verbose.
+      Latter also matches the component name of FCGI_BeginRequestBody struct.
+    - Added build_begin_request() and build_end_request()
+      - added documentation and tests for these
+
 0.05 2010-02-06
     - Net::FastCGI::Constant
       - Improved documentation

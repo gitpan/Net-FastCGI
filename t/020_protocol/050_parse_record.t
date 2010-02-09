@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 37;
+use Test::More tests => 36;
 use Test::BinaryData;
 use Test::Exception;
 
@@ -15,8 +15,7 @@ BEGIN {
     use_ok('Net::FastCGI::Protocol', qw[ build_header
                                          build_record
                                          build_stream
-                                         parse_record
-                                         parse_record_body ]);
+                                         parse_record ]);
 }
 
 my @records_ok = (
@@ -34,10 +33,10 @@ my @records_ok = (
     ],
     [
       "\x01\x03\x00\x01\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-      { type               => FCGI_END_REQUEST,
-        request_id         => 1,
-        protocol_status    => 0,
-        application_status => 0 }
+      { type            => FCGI_END_REQUEST,
+        request_id      => 1,
+        protocol_status => 0,
+        app_status      => 0 }
     ],
     [
       "\x01\x04\x00d\x00\x0B\x05\x00FCGI_PARAMS\x00\x00\x00\x00\x00",
@@ -151,6 +150,5 @@ foreach my $type (@stream_types) {
     is_deeply($got, $expected, "parse_record()");
 }
 
-throws_ok { parse_record() }      qr/^Usage: /;
-throws_ok { parse_record_body() } qr/^Usage: /;
+throws_ok { parse_record() } qr/^Usage: /;
 

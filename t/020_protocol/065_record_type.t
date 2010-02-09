@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 46;
+use Test::More tests => 55;
 use Test::Exception;
 
 BEGIN {
@@ -16,6 +16,9 @@ BEGIN {
                                          is_management_type
                                          is_stream_type ] );
 }
+
+sub TRUE  () { !!1 }
+sub FALSE () { !!0 }
 
 {
     my @known = (
@@ -34,11 +37,7 @@ BEGIN {
     );
 
     foreach my $type (@known) {
-        is( is_known_type($type), !!1, qq/is_known_type($type) = true/ );
-    }
-    
-    foreach my $type (-10, 0, 12) {
-        is( is_known_type($type), !!0, qq/is_known_type($type) = false/ );
+        is( is_known_type($type), TRUE, qq/is_known_type($type) = true/ );
     }
 }
 
@@ -53,8 +52,8 @@ BEGIN {
     );
 
     foreach my $type ( @discrete ) {
-        is( is_stream_type($type),   !!0, qq/is_stream_type($type) = false/ );
-        is( is_discrete_type($type), !!1, qq/is_discrete_type($type) = true/ );
+        is( is_stream_type($type),   FALSE, qq/is_stream_type($type) = false/ );
+        is( is_discrete_type($type), TRUE, qq/is_discrete_type($type) = true/ );
     }
 }
 
@@ -66,7 +65,7 @@ BEGIN {
     );
 
     foreach my $type (@management) {
-        is( is_management_type($type), !!1, qq/is_management_type($type) = true/ );
+        is( is_management_type($type), TRUE, qq/is_management_type($type) = true/ );
     }
 }
 
@@ -80,8 +79,22 @@ BEGIN {
     );
 
     foreach my $type (@stream) {
-        is( is_stream_type($type),   !!1, qq/is_stream_type($type) = true/    );
-        is( is_discrete_type($type), !!0, qq/is_discrete_type($type) = false/ );
+        is( is_stream_type($type),   TRUE, qq/is_stream_type($type) = true/    );
+        is( is_discrete_type($type), FALSE, qq/is_discrete_type($type) = false/ );
+    }
+}
+
+{
+    my @subnames = qw(
+        is_known_type
+        is_discrete_type
+        is_management_type
+        is_stream_type
+    );
+
+    foreach my $name (@subnames) {
+        my $sub = __PACKAGE__->can($name);
+        is($sub->($_), FALSE, qq/$name($_) = false/) for (-10, 0, 12);
     }
 }
 

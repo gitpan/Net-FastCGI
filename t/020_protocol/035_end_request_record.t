@@ -15,9 +15,9 @@ BEGIN {
 }
 
 my @tests = (
-    # octets                                                               request_id  application_status  protocol_status
-    [ "\x01\x03\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",           0,                  0,               0 ],
-    [ "\x01\x03\xFF\xFF\x00\x08\x00\x00\xFF\xFF\xFF\xFF\xFF\x00\x00\x00",      0xFFFF,         0xFFFFFFFF,            0xFF ],
+    # octets                                                               request_id     app_status  protocol_status
+    [ "\x01\x03\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",           0,             0,               0 ],
+    [ "\x01\x03\xFF\xFF\x00\x08\x00\x00\xFF\xFF\xFF\xFF\xFF\x00\x00\x00",      0xFFFF,    0xFFFFFFFF,            0xFF ],
 );
 
 foreach my $test (@tests) {
@@ -27,3 +27,4 @@ foreach my $test (@tests) {
 }
 
 throws_ok { build_end_request_record() } qr/^Usage: /;
+

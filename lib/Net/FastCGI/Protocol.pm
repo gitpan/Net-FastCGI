@@ -6,9 +6,11 @@ use warnings;
 use Net::FastCGI qw[];
 
 BEGIN {
-    our $VERSION   = 0.05;
-    our @EXPORT_OK = qw[ build_begin_request_body
+    our $VERSION   = 0.06;
+    our @EXPORT_OK = qw[ build_begin_request
+                         build_begin_request_body
                          build_begin_request_record
+                         build_end_request
                          build_end_request_body
                          build_end_request_record
                          build_header
