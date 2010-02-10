@@ -2,11 +2,11 @@ package Net::FastCGI::Protocol::PP;
 use strict;
 use warnings;
 
-use Carp                   qw[croak];
+use Carp                   qw[];
 use Net::FastCGI::Constant qw[:all];
 
 BEGIN {
-    our $VERSION   = 0.06;
+    our $VERSION   = 0.07;
     our @EXPORT_OK = qw[ build_begin_request
                          build_begin_request_body
                          build_begin_request_record
@@ -40,6 +40,9 @@ BEGIN {
     *import = \&Exporter::import;
 }
 
+sub TRUE  () { !!1 }
+sub FALSE () { !!0 }
+
 sub ERRMSG_OCTETS    () { q/FastCGI: Insufficient number of octets to parse %s/ }
 sub ERRMSG_MALFORMED () { q/FastCGI: Malformed record %s/ }
 sub ERRMSG_VERSION   () { q/FastCGI: Protocol version mismatch (0x%.2X)/ }
@@ -48,7 +51,7 @@ sub ERRMSG_OCTETS_LE () { q/Invalid Argument: '%s' must be less than or equal to
 
 sub throw {
     @_ = ( sprintf($_[0], @_[1..$#_]) ) if @_ > 1;
-    goto \&croak;
+    goto \&Carp::croak;
 }
 
 # FCGI_Header
@@ -61,7 +64,7 @@ sub build_header {
 sub parse_header {
     @_ == 1 || throw(q/Usage: parse_header(octets)/);
     (defined $_[0] && length $_[0] >= 8)
-      || throw(ERRMSG_OCTETS, q/FCGI_Header/, 8);
+      || throw(ERRMSG_OCTETS, q/FCGI_Header/);
     (unpack('C', $_[0]) == FCGI_VERSION_1)
       || throw(ERRMSG_VERSION, unpack('C', $_[0]));
     return unpack('xCnnCx', $_[0])
@@ -82,7 +85,7 @@ sub build_begin_request_body {
 sub parse_begin_request_body {
     @_ == 1 || throw(q/Usage: parse_begin_request_body(octets)/);
     (defined $_[0] && length $_[0] >= 8)
-      || throw(ERRMSG_OCTETS, q/FCGI_BeginRequestBody/, 8);
+      || throw(ERRMSG_OCTETS, q/FCGI_BeginRequestBody/);
     return unpack(FCGI_BeginRequestBody, $_[0]);
 }
 
@@ -96,7 +99,7 @@ sub build_end_request_body {
 sub parse_end_request_body {
     @_ == 1 || throw(q/Usage: parse_end_request_body(octets)/);
     (defined $_[0] && length $_[0] >= 8)
-      || throw(ERRMSG_OCTETS, q/FCGI_EndRequestBody/, 8);
+      || throw(ERRMSG_OCTETS, q/FCGI_EndRequestBody/);
     return unpack(FCGI_EndRequestBody, $_[0]);
 }
 
@@ -110,7 +113,7 @@ sub build_unknown_type_body {
 sub parse_unknown_type_body {
     @_ == 1 || throw(q/Usage: parse_unknown_type_body(octets)/);
     (defined $_[0] && length $_[0] >= 8)
-      || throw(ERRMSG_OCTETS, q/FCGI_UnknownTypeBody/, 8);
+      || throw(ERRMSG_OCTETS, q/FCGI_UnknownTypeBody/);
     return unpack(FCGI_UnknownTypeBody, $_[0]);
 }
 
@@ -165,7 +168,7 @@ sub build_record {
 }
 
 sub parse_record {
-    @_ == 1 || croak(q/Usage: parse_record(octets)/);
+    @_ == 1 || throw(q/Usage: parse_record(octets)/);
     my ($type, $request_id, $content_length) = parse_header($_[0]);
 
     (length $_[0] >= FCGI_HEADER_LEN + $content_length)
@@ -176,7 +179,7 @@ sub parse_record {
 }
 
 sub parse_record_body {
-    @_ == 3 || croak(q/Usage: parse_record_body(type, request_id, content)/);
+    @_ == 3 || throw(q/Usage: parse_record_body(type, request_id, content)/);
     my ($type, $request_id, $content) = @_;
 
     my $content_length = defined $content ? length $content : 0;
@@ -295,12 +298,12 @@ sub build_begin_request {
     my ($request_id, $role, $flags, $params) = @_;
 
     my $r = build_begin_request_record($request_id, $role, $flags)
-          . build_stream(FCGI_PARAMS, $request_id, build_params($params), 1);
+          . build_stream(FCGI_PARAMS, $request_id, build_params($params), TRUE);
 
     if (@_ > 4) {
-        $r .= build_stream(FCGI_STDIN, $request_id, $_[4], 1);
+        $r .= build_stream(FCGI_STDIN, $request_id, $_[4], TRUE);
         if (@_ > 5) {
-            $r .= build_stream(FCGI_DATA, $request_id, $_[5], 1);
+            $r .= build_stream(FCGI_DATA, $request_id, $_[5], TRUE);
         }
     }
     return $r;
@@ -312,9 +315,9 @@ sub build_end_request {
 
     my $r;
     if (@_ > 3) {
-        $r .= build_stream(FCGI_STDOUT, $request_id, $_[3], 1);
+        $r .= build_stream(FCGI_STDOUT, $request_id, $_[3], TRUE);
         if (@_ > 4) {
-            $r .= build_stream(FCGI_STDERR, $request_id, $_[4], 1);
+            $r .= build_stream(FCGI_STDERR, $request_id, $_[4], TRUE);
         }
     }
     $r .= build_end_request_record($request_id, $app_status, $protocol_status);

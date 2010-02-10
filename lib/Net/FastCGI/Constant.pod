@@ -201,8 +201,8 @@ Christian Hansen C<chansen@cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008 Christian Hansen. All rights reserved.
+Copyright 2008-2010 by Christian Hansen.
 
-This program is free software, you can redistribute it and/or modify
+This library is free software; you can redistribute it and/or modify 
 it under the same terms as Perl itself.
 

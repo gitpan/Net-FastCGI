@@ -10,7 +10,7 @@ PACKAGES
         Provides functions to build and parse FastCGI messages.
 
 ENVIRONMENT
-    Set the environment variable "NET_FASTCGI_PP" to a true value before
+    Environment variable "NET_FASTCGI_PP" can be set to a true value before
     loading this package to disable usage of XS implementation.
 
 PREREQUISITES
@@ -26,30 +26,64 @@ PREREQUISITES
     Test::Exception.
     Test::BinaryData 0.007 or greater.
 
-INSTALL
-        perl Makefile.PL
-        make
-        make test
-        sudo make install
-
 EXPORTS
     None.
 
 SEE ALSO
-    <http://www.fastcgi.com/devkit/doc/fcgi-spec.html>
-    FCGI
-    FCGI::Async
-    FCGI::Client
-    FCGI::EV
+  Community
+    Official FastCGI site
+        <http://www.fastcgi.com/>
+
+  Standards
+    FastCGI Specification Version 1.0
+        <http://www.fastcgi.com/devkit/doc/fcgi-spec.html>
+
+    RFC 3875 - The Common Gateway Interface (CGI) Version 1.1
+        <http://tools.ietf.org/html/rfc3875>
+
+  White papers
+    FastCGI: A High-Performance Web Server Interface
+        <http://www.fastcgi.com/devkit/doc/fastcgi-whitepaper/fastcgi.htm>
+
+    FastCGI - The Forgotten Treasure
+        <http://cryp.to/publications/fastcgi/>
+
+  Implementations
     AnyEvent::FCGI
+        Application server implementation, built on top of AnyEvent.
+        Supports Responder role.
+
+    FCGI
+        Application server implementation, built on top of "libfcgi"
+        (reference implementation). Supports all FastCGI roles. Responds to
+        management records. Processes requests synchronously.
+
+    FCGI::Async
+        Application server implementation, built on top of IO::Async.
+        Supports Responder role. Responds to management records. Capable of
+        multiplexing serveral requests over one connection.
+
+    FCGI::Client
+        Web server (client) implementation. Supports Responder role.
+
+    FCGI::EV
+        Application server implementation, built on top of EV. Supports
+        Responder role.
+
+    Mojo::Server::FastCGI
+        Application server implementation. Supports Responder role.
+        Processes requests synchronously.
+
     POE::Component::FastCGI
+        Application server implementation, built on top of POE. Supports
+        Responder role. Capable of multiplexing.
 
 AUTHOR
     Christian Hansen "chansen@cpan.org"
 
 COPYRIGHT
-    Copyright (c) 2008 Christian Hansen. All rights reserved.
+    Copyright 2008-2010 by Christian Hansen.
 
-    This program is free software, you can redistribute it and/or modify it
+    This library is free software; you can redistribute it and/or modify it
     under the same terms as Perl itself.
 

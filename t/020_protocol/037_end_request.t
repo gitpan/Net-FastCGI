@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 11;
+use Test::More tests => 13;
 use Test::BinaryData;
 use Test::Exception;
 
@@ -39,7 +39,7 @@ BEGIN {
         is_binary($got, $exp, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE, undef)>);
     }
 
-    my $stderr .= "\x01\x07\x00\x01\x00\x00\x00\x00"; # FCGI_Header type=FCGI_STDERR
+    my $stderr = "\x01\x07\x00\x01\x00\x00\x00\x00"; # FCGI_Header type=FCGI_STDERR
 
     {
         my $exp = $stdout . $stderr . $end;
@@ -51,6 +51,32 @@ BEGIN {
         my $exp = $stdout . $stderr . $end;
         my $got = build_end_request(1, 0, FCGI_REQUEST_COMPLETE, undef, '');
         is_binary($got, $exp, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE, undef, '')>);
+    }
+}
+
+{
+    my $end = "\x01\x03\x00\x01\x00\x08\x00\x00" # FCGI_Header id=1
+            . "\x00\x00\x00\x00\x00\x00\x00\x00" # FCGI_EndRequestBody
+            ;
+
+    my $stdout = "\x01\x06\x00\x01\x03\xFC\x04\x00" # FCGI_Header type=FCGI_STDOUT
+               . "x" x 1020 . "\0" x 4
+               . "\x01\x06\x00\x01\x00\x00\x00\x00";
+
+    {
+        my $exp = $stdout . $end;
+        my $got = build_end_request(1, 0, FCGI_REQUEST_COMPLETE, 'x' x 1020);
+        is_binary($got, $exp, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE, 'x' x 1020)>);
+    }
+
+    my $stderr = "\x01\x07\x00\x01\x04\x00\x00\x00" # FCGI_Header type=FCGI_STDERR
+               . "y" x 1024
+               . "\x01\x07\x00\x01\x00\x00\x00\x00";
+
+    {
+        my $exp = $stdout . $stderr . $end;
+        my $got = build_end_request(1, 0, FCGI_REQUEST_COMPLETE, 'x' x 1020, 'y' x 1024);
+        is_binary($got, $exp, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE, 'x' x 1020, 'y' x 1024)>);
     }
 }
 

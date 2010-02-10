@@ -1,5 +1,11 @@
+0.07 2010-02-10
+    - Added notes about existing Perl implementations.
+    - Added references to specifications and white papers.
+    - Minor internal "cosmetic" changes
+    - Added more tests for build_begin_request() and build_end_request()
+
 0.06 2010-02-09
-    - NOTE: Changed application_status to app_status, this only affects users of
+    - NOTE: Changed application_status to app_status, this affects users of
       parse_record() or parse_record_body(). Former was unnecessarily verbose.
       Latter also matches the component name of FCGI_BeginRequestBody struct.
     - Added build_begin_request() and build_end_request()
