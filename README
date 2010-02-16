@@ -24,7 +24,7 @@ PREREQUISITES
 
     Test::More 0.47 or greater, core module since 5.6.2.
     Test::Exception.
-    Test::BinaryData 0.007 or greater.
+    Test::HexString.
 
 EXPORTS
     None.
@@ -51,7 +51,7 @@ SEE ALSO
   Implementations
     AnyEvent::FCGI
         Application server implementation, built on top of AnyEvent.
-        Supports Responder role.
+        Supports Responder role. Capable of multiplexing.
 
     FCGI
         Application server implementation, built on top of "libfcgi"
@@ -61,7 +61,7 @@ SEE ALSO
     FCGI::Async
         Application server implementation, built on top of IO::Async.
         Supports Responder role. Responds to management records. Capable of
-        multiplexing serveral requests over one connection.
+        multiplexing.
 
     FCGI::Client
         Web server (client) implementation. Supports Responder role.

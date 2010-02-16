@@ -6,7 +6,7 @@ use Carp                   qw[];
 use Net::FastCGI::Constant qw[:all];
 
 BEGIN {
-    our $VERSION   = 0.07;
+    our $VERSION   = 0.08;
     our @EXPORT_OK = qw[ build_begin_request
                          build_begin_request_body
                          build_begin_request_record
@@ -46,8 +46,7 @@ sub FALSE () { !!0 }
 sub ERRMSG_OCTETS    () { q/FastCGI: Insufficient number of octets to parse %s/ }
 sub ERRMSG_MALFORMED () { q/FastCGI: Malformed record %s/ }
 sub ERRMSG_VERSION   () { q/FastCGI: Protocol version mismatch (0x%.2X)/ }
-sub ERRMSG_OCTETS_GE () { q/Invalid Argument: '%s' must be greater than or equal to %u octets in length/ }
-sub ERRMSG_OCTETS_LE () { q/Invalid Argument: '%s' must be less than or equal to %u octets in length/ }
+sub ERRMSG_OCTETS_LE () { q/Invalid Argument: '%s' cannot exceed %u octets in length/ }
 
 sub throw {
     @_ = ( sprintf($_[0], @_[1..$#_]) ) if @_ > 1;
@@ -362,19 +361,19 @@ sub is_stream_type {
 sub get_type_name {
     @_ == 1 || throw(q/Usage: get_type_name(type)/);
     my ($type) = @_;
-    return $FCGI_TYPE_NAME[$type] || sprintf('UNKNOWN (0x%.2X)', $type);
+    return $FCGI_TYPE_NAME[$type] || sprintf('0x%.2X', $type);
 }
 
 sub get_role_name {
     @_ == 1 || throw(q/Usage: get_role_name(role)/);
     my ($role) = @_;
-    return $FCGI_ROLE_NAME[$role] || sprintf('UNKNOWN (0x%.4X)', $role);
+    return $FCGI_ROLE_NAME[$role] || sprintf('0x%.4X', $role);
 }
 
 sub get_protocol_status_name {
     @_ == 1 || throw(q/Usage: get_protocol_status_name(protocol_status)/);
     my ($status) = @_;
-    return $FCGI_PROTOCOL_STATUS_NAME[$status] || sprintf('UNKNOWN (0x%.2X)', $status);
+    return $FCGI_PROTOCOL_STATUS_NAME[$status] || sprintf('0x%.2X', $status);
 }
 
 1;

@@ -47,7 +47,7 @@ In addition to Run-Time:
 
 =item L<Test::Exception>.
 
-=item L<Test::BinaryData> 0.007 or greater.
+=item L<Test::HexString>.
 
 =back
 
@@ -102,6 +102,7 @@ L<http://cryp.to/publications/fastcgi/>
 =item L<AnyEvent::FCGI>
 
 Application server implementation, built on top of L<AnyEvent>. Supports Responder role.
+Capable of multiplexing.
 
 =item L<FCGI>
 
@@ -111,7 +112,7 @@ Supports all FastCGI roles. Responds to management records. Processes requests s
 =item L<FCGI::Async>
 
 Application server implementation, built on top of L<IO::Async>. Supports Responder role. 
-Responds to management records. Capable of multiplexing serveral requests over one connection.
+Responds to management records. Capable of multiplexing.
 
 =item L<FCGI::Client>
 

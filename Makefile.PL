@@ -10,7 +10,7 @@ requires      'Exporter'         => '0';
 
 test_requires 'Test::More'       => '0.47';
 test_requires 'Test::Exception'  => '0';
-test_requires 'Test::BinaryData' => '0.007';
+test_requires 'Test::HexString'  => '0';
 
 tests 't/*.t t/*/*.t';
 

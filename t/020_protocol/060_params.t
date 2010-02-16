@@ -7,7 +7,7 @@ use lib 't/lib', 'lib';
 use myconfig;
 
 use Test::More tests => 24;
-use Test::BinaryData;
+use Test::HexString;
 use Test::Exception;
 
 BEGIN {
@@ -26,14 +26,14 @@ my @tests = (
 foreach my $test (@tests) {
     my $expected = $test->[0];
     my $got      = build_params($test->[1]);
-    is_binary($got, $expected, 'build_params()');
+    is_hexstr($got, $expected, 'build_params()');
 }
 
-is_binary("\x03\x00foo", build_params({foo => undef}), 'build_params({foo => undef})');
-is_binary("\x7F\x00" . "x" x 127, build_params({ "x" x 127 => '' }));
-is_binary("\x00\x7F" . "x" x 127, build_params({ '' => "x" x 127 }));
-is_binary("\x80\x00\x00\x80\x00" . "x" x 128, build_params({ "x" x 128 => '' }));
-is_binary("\x00\x80\x00\x00\x80" . "x" x 128, build_params({ '' => "x" x 128 }));
+is_hexstr("\x03\x00foo", build_params({foo => undef}), 'build_params({foo => undef})');
+is_hexstr("\x7F\x00" . "x" x 127, build_params({ "x" x 127 => '' }));
+is_hexstr("\x00\x7F" . "x" x 127, build_params({ '' => "x" x 127 }));
+is_hexstr("\x80\x00\x00\x80\x00" . "x" x 128, build_params({ "x" x 128 => '' }));
+is_hexstr("\x00\x80\x00\x00\x80" . "x" x 128, build_params({ '' => "x" x 128 }));
 
 foreach my $test (@tests) {
     my $expected = $test->[1];

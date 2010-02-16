@@ -7,7 +7,7 @@ use lib 't/lib', 'lib';
 use myconfig;
 
 use Test::More tests => 13;
-use Test::BinaryData;
+use Test::HexString;
 use Test::Exception;
 
 BEGIN {
@@ -22,7 +22,7 @@ BEGIN {
 
     {
         my $got = build_end_request(1, 0, FCGI_REQUEST_COMPLETE);
-        is_binary($got, $end, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE)>);
+        is_hexstr($got, $end, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE)>);
     }
 
     my $stdout = "\x01\x06\x00\x01\x00\x00\x00\x00"; # FCGI_Header type=FCGI_STDOUT
@@ -30,13 +30,13 @@ BEGIN {
     {
         my $exp = $stdout . $end;
         my $got = build_end_request(1, 0, FCGI_REQUEST_COMPLETE, '');
-        is_binary($got, $exp, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE, '')>);
+        is_hexstr($got, $exp, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE, '')>);
     }
 
     {
         my $exp = $stdout . $end;
         my $got = build_end_request(1, 0, FCGI_REQUEST_COMPLETE, undef);
-        is_binary($got, $exp, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE, undef)>);
+        is_hexstr($got, $exp, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE, undef)>);
     }
 
     my $stderr = "\x01\x07\x00\x01\x00\x00\x00\x00"; # FCGI_Header type=FCGI_STDERR
@@ -44,13 +44,13 @@ BEGIN {
     {
         my $exp = $stdout . $stderr . $end;
         my $got = build_end_request(1, 0, FCGI_REQUEST_COMPLETE, '', undef);
-        is_binary($got, $exp, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE, '', undef)>);
+        is_hexstr($got, $exp, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE, '', undef)>);
     }
 
     {
         my $exp = $stdout . $stderr . $end;
         my $got = build_end_request(1, 0, FCGI_REQUEST_COMPLETE, undef, '');
-        is_binary($got, $exp, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE, undef, '')>);
+        is_hexstr($got, $exp, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE, undef, '')>);
     }
 }
 
@@ -66,7 +66,7 @@ BEGIN {
     {
         my $exp = $stdout . $end;
         my $got = build_end_request(1, 0, FCGI_REQUEST_COMPLETE, 'x' x 1020);
-        is_binary($got, $exp, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE, 'x' x 1020)>);
+        is_hexstr($got, $exp, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE, 'x' x 1020)>);
     }
 
     my $stderr = "\x01\x07\x00\x01\x04\x00\x00\x00" # FCGI_Header type=FCGI_STDERR
@@ -76,7 +76,7 @@ BEGIN {
     {
         my $exp = $stdout . $stderr . $end;
         my $got = build_end_request(1, 0, FCGI_REQUEST_COMPLETE, 'x' x 1020, 'y' x 1024);
-        is_binary($got, $exp, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE, 'x' x 1020, 'y' x 1024)>);
+        is_hexstr($got, $exp, q<build_end_request(1, 0, FCGI_REQUEST_COMPLETE, 'x' x 1020, 'y' x 1024)>);
     }
 }
 

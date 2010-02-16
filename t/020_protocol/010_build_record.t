@@ -7,7 +7,7 @@ use lib 't/lib', 'lib';
 use myconfig;
 
 use Test::More tests => 11;
-use Test::BinaryData;
+use Test::HexString;
 use Test::Exception;
 
 BEGIN {
@@ -26,16 +26,16 @@ my @tests = (
 foreach my $test (@tests) {
     my $expected = $test->[0];
     my $got      = build_record(@$test[1..3]);
-    is_binary($got, $expected, 'build_record()');
+    is_hexstr($got, $expected, 'build_record()');
 }
 
 {
     my $exp = "\x01\x01\x00\x02\x00\x00\x00\x00";
     my $got = build_record(1, 2);
-    is_binary($got, $exp, 'build_record(1, 2)');
+    is_hexstr($got, $exp, 'build_record(1, 2)');
 }
 
-throws_ok { build_record( 0, 0, "\x00" x (0xFFFF + 1) ) } qr/^Invalid Argument: 'content' must be less than or equal to/;
+throws_ok { build_record( 0, 0, "\x00" x (0xFFFF + 1) ) } qr/^Invalid Argument: 'content' cannot exceed/;
 
 # build_record(type, request_id [, content])
 for (0..1, 4) {

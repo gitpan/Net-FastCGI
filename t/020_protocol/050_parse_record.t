@@ -7,7 +7,7 @@ use lib 't/lib', 'lib';
 use myconfig;
 
 use Test::More tests => 36;
-use Test::BinaryData;
+use Test::HexString;
 use Test::Exception;
 
 BEGIN {

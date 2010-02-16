@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 28;
+use Test::More tests => 29;
 use Test::Exception;
 
 BEGIN {
@@ -37,7 +37,7 @@ BEGIN {
     }
 
     foreach my $type ( 0, 0xFF ) {
-        like( get_type_name($type), qr/^UNKNOWN \(0x..\)/ );
+        is(get_type_name($type), sprintf('0x%.2X', $type));
     }
 }
 
@@ -53,8 +53,8 @@ BEGIN {
         is( get_role_name($role), $name, qq/get_role_name($role) = $name/ );
     }
 
-    foreach my $role ( 0, 0xFF ) {
-        like( get_role_name($role), qr/^UNKNOWN \(0x00..\)/ );
+    foreach my $role ( 0, 0xFF, 0xFFFF ) {
+        is(get_role_name($role), sprintf('0x%.4X', $role));
     }
 }
 
@@ -71,7 +71,7 @@ BEGIN {
         is( get_protocol_status_name($status), $name, qq/get_protocol_status_name($status) = $name/ );
     }
 
-    like( get_protocol_status_name(0xFF), qr/^UNKNOWN \(0xFF\)/ );
+    is(get_protocol_status_name(0xFF), '0xFF');
 }
 
 throws_ok { get_type_name()              } qr/^Usage: /;

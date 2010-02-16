@@ -58,6 +58,11 @@ Net::FastCGI::Protocol - Provides functions to build and parse FastCGI messages.
 
 Provides functions to build and parse FastCGI messages.
 
+Please note that all functions in this package expects octets, not unicode strings.
+It's the callers responsibility to ensure this. If any of theese functions is called
+with unicode strings containing code points above 255, they will most likely produce
+malformed messages.
+
 =head1 FUNCTIONS
 
 =head2 build_begin_request
@@ -808,6 +813,8 @@ An unsigned 8-bit integer.
 I<Usage>
 
     $name = get_type_name($type);
+    $name = get_type_name(FCGI_BEGIN_REQUEST);  # 'FCGI_BEGIN_REQUEST'
+    $name = get_type_name(255);                 # '0xFF'
 
 I<Arguments>
 
@@ -825,15 +832,22 @@ I<Returns>
 
 =item C<$name>
 
-A string containing the name of the type.
+A string containing the name of the type. If C<$type> is not a known v1.0 type,
+a hexadecimal value is returned.
 
 =back
+
+I<Note>
+
+See also L<Net::FastCGI::Constant/":name">.
 
 =head2 get_role_name
 
 I<Usage>
 
     $name = get_role_name($type);
+    $name = get_role_name(FCGI_RESPONDER);  # 'FCGI_RESPONDER'
+    $name = get_role_name(65535);           # '0xFFFF'
 
 I<Arguments>
 
@@ -851,15 +865,22 @@ I<Returns>
 
 =item C<$name>
 
-A string containing the name of the role.
+A string containing the name of the role. If C<$role> is not a known v1.0 role, 
+a hexadecimal value is returned.
 
 =back
+
+I<Note>
+
+See also L<Net::FastCGI::Constant/":name">.
 
 =head2 get_protocol_status_name
 
 I<Usage>
 
     $name = get_protocol_status_name($protocol_status);
+    $name = get_protocol_status_name(FCGI_REQUEST_COMPLETE);    # 'FCGI_REQUEST_COMPLETE'
+    $name = get_protocol_status_name(255);                      # '0xFF'
 
 I<Arguments>
 
@@ -877,9 +898,14 @@ I<Returns>
 
 =item C<$name>
 
-A string containing the name of the protocol status.
+A string containing the name of the protocol status. If C<$protocol_status> is 
+not a known v1.0 protocol status code, a hexadecimal value is returned.
 
 =back
+
+I<Note>
+
+See also L<Net::FastCGI::Constant/:name>.
 
 =head2 is_known_type
 
@@ -903,7 +929,7 @@ I<Returns>
 
 =item C<$boolean>
 
-A boolean indicating whether or not C<$type> is a known FastCGI v1 type.
+A boolean indicating whether or not C<$type> is a known FastCGI v1.0 type.
 
 =back
 

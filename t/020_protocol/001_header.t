@@ -7,7 +7,7 @@ use lib 't/lib', 'lib';
 use myconfig;
 
 use Test::More tests => 13;
-use Test::BinaryData;
+use Test::HexString;
 use Test::Exception;
 
 BEGIN {
@@ -24,7 +24,7 @@ my @tests = (
 foreach my $test (@tests) {
     my $expected = $test->[0];
     my $got      = build_header(@$test[1..4]);
-    is_binary($got, $expected, 'build_header()');
+    is_hexstr($got, $expected, 'build_header()');
 }
 
 foreach my $test (@tests) {

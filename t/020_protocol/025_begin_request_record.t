@@ -7,7 +7,7 @@ use lib 't/lib', 'lib';
 use myconfig;
 
 use Test::More tests => 4;
-use Test::BinaryData;
+use Test::HexString;
 use Test::Exception;
 
 BEGIN {
@@ -23,7 +23,7 @@ my @tests = (
 foreach my $test (@tests) {
     my $expected = $test->[0];
     my $got      = build_begin_request_record(@$test[1..3]);
-    is_binary($got, $expected, 'build_begin_request_record()');
+    is_hexstr($got, $expected, 'build_begin_request_record()');
 }
 
 throws_ok { build_begin_request_record() } qr/^Usage: /;

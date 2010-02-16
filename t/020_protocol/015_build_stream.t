@@ -7,7 +7,7 @@ use lib 't/lib', 'lib';
 use myconfig;
 
 use Test::More tests => 12;
-use Test::BinaryData;
+use Test::HexString;
 use Test::Exception;
 
 BEGIN {
@@ -35,7 +35,7 @@ my @tests = (
 foreach my $test (@tests) {
     my $expected = $test->[0];
     my $got      = build_stream(@$test[1..4]);
-    is_binary($got, $expected, 'build_stream()');
+    is_hexstr($got, $expected, 'build_stream()');
 }
 
 {
@@ -46,13 +46,13 @@ foreach my $test (@tests) {
     {
         my $expected = $header . $content;
         my $got      = build_stream(1,1, $content);
-        is_binary($got, $expected, 'build_stream(content_length: 32760 terminate:false)');
+        is_hexstr($got, $expected, 'build_stream(content_length: 32760 terminate:false)');
     }
 
     {
         my $expected = $header . $content . $trailer;
         my $got      = build_stream(1,1, $content, 1);
-        is_binary($got, $expected, 'build_stream(content_length: 32760 terminate:true)');
+        is_hexstr($got, $expected, 'build_stream(content_length: 32760 terminate:true)');
     }
 }
 
@@ -68,13 +68,13 @@ foreach my $test (@tests) {
     {
         my $expected = $records;
         my $got      = build_stream(1,1, $content);
-        is_binary($got, $records, 'build_stream(content_length: 32768 terminate:false)');
+        is_hexstr($got, $records, 'build_stream(content_length: 32768 terminate:false)');
     }
 
     {
         my $expected = $records . $trailer;
         my $got      = build_stream(1,1, $content, 1);
-        is_binary($got, $expected, 'build_stream(content_length: 32768 terminate:true)');
+        is_hexstr($got, $expected, 'build_stream(content_length: 32768 terminate:true)');
     }
 }
 
