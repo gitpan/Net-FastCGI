@@ -6,14 +6,18 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 24;
+use Test::More tests => 38;
 use Test::HexString;
 use Test::Exception;
 
 BEGIN {
     use_ok('Net::FastCGI::Protocol', qw[ build_params
+                                         check_params
                                          parse_params ]);
 }
+
+sub TRUE  () { !!1 }
+sub FALSE () { !!0 }
 
 my @tests = (
     # octets                                               params
@@ -41,6 +45,11 @@ foreach my $test (@tests) {
     is_deeply($got, $expected, 'parse_params()');
 }
 
+foreach my $test (@tests) {
+    my $octets = $test->[0];
+    is(check_params($octets), TRUE, 'check_params(octets) eq TRUE');
+}
+
 my @insufficient = (
     "\x00",
     "\x01",
@@ -56,6 +65,13 @@ foreach my $test (@insufficient) {
     throws_ok { parse_params($test) } qr/^FastCGI: Insufficient .* FCGI_NameValuePair/;
 }
 
+foreach my $test (@insufficient) {
+    is(check_params($test), FALSE, 'check_params(octets) eq FALSE');
+}
+
+is(check_params(undef), FALSE, 'check_params(undef) eq FALSE');
+
+throws_ok { check_params() } qr/^Usage: /;
 throws_ok { build_params() } qr/^Usage: /;
 throws_ok { parse_params() } qr/^Usage: /;
 

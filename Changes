@@ -1,3 +1,9 @@
+0.09 2010-03-31
+    - Added check_params() and dump_record()
+      - added documentation 
+      - added test for check_params() and dump_record() (incomplete)
+    - Minor optimizations to build_stream() and build_record()
+
 0.08 2010-02-16
     - Documented return value of get_type_name(), get_role_name()
       and get_protocol_status_name().

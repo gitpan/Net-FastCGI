@@ -6,7 +6,7 @@ use Carp                   qw[];
 use Net::FastCGI::Constant qw[:all];
 
 BEGIN {
-    our $VERSION   = 0.08;
+    our $VERSION   = 0.09;
     our @EXPORT_OK = qw[ build_begin_request
                          build_begin_request_body
                          build_begin_request_record
@@ -19,6 +19,7 @@ BEGIN {
                          build_stream
                          build_unknown_type_body
                          build_unknown_type_record
+                         check_params
                          parse_begin_request_body
                          parse_end_request_body
                          parse_header
@@ -153,17 +154,17 @@ sub build_record {
     ($content_length <= FCGI_MAX_CONTENT_LEN)
       || throw(ERRMSG_OCTETS_LE, q/content/, FCGI_MAX_CONTENT_LEN);
 
-    my $octets = build_header($type, $request_id, $content_length, $padding_length);
+    my $res = build_header($type, $request_id, $content_length, $padding_length);
 
     if ($content_length) {
-        $octets .= pop;
+        $res .= $_[2];
     }
 
     if ($padding_length) {
-        $octets .= "\x00" x $padding_length;
+        $res .= "\x00" x $padding_length;
     }
 
-    return $octets;
+    return $res;
 }
 
 sub parse_record {
@@ -231,24 +232,36 @@ sub parse_record_body {
 sub FCGI_SEGMENT_LEN () { 32768 - FCGI_HEADER_LEN }
 
 sub build_stream {
-    @_ == 3 || @_ == 4 || throw(q/Usage: build_stream(type, request_id, octets [, terminate])/);
-    my ($type, $request_id, $octets, $terminate) = @_;
+    @_ == 3 || @_ == 4 || throw(q/Usage: build_stream(type, request_id, content [, terminate])/);
+    my ($type, $request_id, undef, $terminate) = @_;
 
-    my $remain = defined $octets ? length $octets : 0;
-    my $length;
-    my $stream = '';
+    my $len = defined $_[2] ? length $_[2] : 0;
+    my $res = '';
 
-    while ($remain) {
-        $length = ($remain > FCGI_SEGMENT_LEN) ? FCGI_SEGMENT_LEN : $remain;
-        $stream .= build_record($type, $request_id, substr($octets, 0, $length, ''));
-        $remain -= $length;
+    if ($len) {
+        if ($len < FCGI_SEGMENT_LEN) {
+            $res = build_record($type, $request_id, $_[2]);
+        }
+        else {
+            my $header = build_header($type, $request_id, FCGI_SEGMENT_LEN, 0);
+            my $off    = 0; 
+            while ($len >= FCGI_SEGMENT_LEN) {
+                $res .= $header;
+                $res .= substr($_[2], $off, FCGI_SEGMENT_LEN);
+                $len -= FCGI_SEGMENT_LEN;
+                $off += FCGI_SEGMENT_LEN;
+            }
+            if ($len) {
+                $res .= build_record($type, $request_id, substr($_[2], $off, $len));
+            }
+        }
     }
 
     if ($terminate) {
-        $stream .= build_header($type, $request_id, 0, 0);
+        $res .= build_header($type, $request_id, 0, 0);
     }
 
-    return $stream;
+    return $res;
 }
 
 sub build_params {
@@ -258,7 +271,7 @@ sub build_params {
     while (my ($key, $val) = each(%$params)) {
         for ($key, $val) {
             my $len = defined $_ ? length : 0;
-            $res .= $len < 0x80 ? pack('C', $len) : pack('N', $len | 0x80000000);
+            $res .= $len < 0x80 ? pack('C', $len) : pack('N', $len | 0x8000_0000);
         }
         $res .= $key;
         $res .= $val if defined $val;
@@ -267,7 +280,7 @@ sub build_params {
 }
 
 sub parse_params {
-    @_ == 1 || throw(q/Usage: parse_params(params)/);
+    @_ == 1 || throw(q/Usage: parse_params(octets)/);
     my ($octets) = @_;
 
     (defined $octets)
@@ -290,6 +303,30 @@ sub parse_params {
         $params->{$key} = substr($octets, 0, $vlen, '');
     }
     return $params;
+}
+
+sub check_params {
+    @_ == 1 || throw(q/Usage: check_params(octets)/);
+    my ($octets) = @_;
+
+    (defined $octets)
+      || return FALSE;
+
+    my ($len, $off, $klen, $vlen) = (length($octets), 0, 0, 0);
+    while ($off < $len) {
+        for ($klen, $vlen) {
+            (($off += 1) <= $len)
+              || return FALSE;
+            $_ = unpack('C', substr($octets, $off - 1, 1));
+            next if $_ < 0x80;
+            (($off += 3) <= $len)
+              || return FALSE;
+            $_ = unpack('N', substr($octets, $off - 4, 4)) & 0x7FFF_FFFF;
+        }
+        (($off += $klen + $vlen) <= $len)
+          || return FALSE;
+    }
+    return TRUE;
 }
 
 sub build_begin_request {

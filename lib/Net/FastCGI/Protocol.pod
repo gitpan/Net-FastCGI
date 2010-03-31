@@ -523,6 +523,71 @@ A string of octets containing the record. String is 16 octets in length.
 
 =back
 
+=head2 check_params
+
+Determine wheter or not params is well-formed.
+
+I<Usage>
+
+    $boolean = check_params($octets);
+
+I<Arguments>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing C<FCGI_NameValuePair>'s.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$boolean>
+
+A boolean indicating whether or not C<$octets> consist of well-formed C<FCGI_NameValuePair>'s.
+
+=back
+
+=head2 dump_record
+
+Dump a C<FCGI_Record>.
+
+I<Usage>
+
+    $string = dump_record($type, $request_id);
+    $string = dump_record($type, $request_id, $content);
+
+I<Arguments>
+
+=over 4
+
+=item C<$type>
+
+An unsigned 8-bit integer.
+
+=item C<$request_id>
+
+An unsigned 16-bit integer.
+
+=item C<$content> (optional)
+
+A string of octets containing the content. Maybe C<undef>.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$string>
+
+A string consisting of a short (less than 100 characters) representation of record in printable US-ASCII.
+
+=back
+
 =head2 parse_begin_request_body
 
 Parses a C<FCGI_BeginRequestBody>.

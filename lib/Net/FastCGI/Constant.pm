@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 BEGIN {
-    our $VERSION        = 0.08;
+    our $VERSION        = 0.09;
     my @common          = qw[ FCGI_MAX_CONTENT_LEN
                               FCGI_MAX_LEN
                               FCGI_HEADER_LEN
@@ -58,7 +58,7 @@ BEGIN {
                              @pack,
                              @name );
 
-    our %EXPORT_TAGS =    (  all             => \@EXPORT_OK,
+    our %EXPORT_TAGS    = (  all             => \@EXPORT_OK,
                              common          => \@common,
                              type            => \@type,
                              role            => \@role,
