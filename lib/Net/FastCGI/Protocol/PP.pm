@@ -6,7 +6,7 @@ use Carp                   qw[];
 use Net::FastCGI::Constant qw[:all];
 
 BEGIN {
-    our $VERSION   = 0.09;
+    our $VERSION   = '0.10';
     our @EXPORT_OK = qw[ build_begin_request
                          build_begin_request_body
                          build_begin_request_record
@@ -65,7 +65,7 @@ sub parse_header {
     @_ == 1 || throw(q/Usage: parse_header(octets)/);
     (defined $_[0] && length $_[0] >= 8)
       || throw(ERRMSG_OCTETS, q/FCGI_Header/);
-    (unpack('C', $_[0]) == FCGI_VERSION_1)
+    (vec($_[0], 0, 8) == FCGI_VERSION_1)
       || throw(ERRMSG_VERSION, unpack('C', $_[0]));
     return unpack('xCnnCx', $_[0])
       if wantarray;
@@ -180,15 +180,18 @@ sub parse_record {
 
 sub parse_record_body {
     @_ == 3 || throw(q/Usage: parse_record_body(type, request_id, content)/);
-    my ($type, $request_id, $content) = @_;
+    my ($type, $request_id) = @_;
 
-    my $content_length = defined $content ? length $content : 0;
+    my $content_length = defined $_[2] ? length $_[2] : 0;
     my %record = (type => $type, request_id => $request_id);
 
-    if ($type == FCGI_BEGIN_REQUEST) {
+    if ($content_length > FCGI_MAX_CONTENT_LEN) {
+        throw(ERRMSG_MALFORMED, $FCGI_RECORD_NAME[$type] || q/FCGI_Record/);
+    }
+    elsif ($type == FCGI_BEGIN_REQUEST) {
         ($request_id != FCGI_NULL_REQUEST_ID && $content_length == 8)
           || throw(ERRMSG_MALFORMED, q/FCGI_BeginRequestRecord/);
-        @record{ qw(role flags) } = parse_begin_request_body($content);
+        @record{ qw(role flags) } = parse_begin_request_body($_[2]);
     }
     elsif ($type == FCGI_ABORT_REQUEST) {
         ($request_id != FCGI_NULL_REQUEST_ID && $content_length == 0)
@@ -198,7 +201,7 @@ sub parse_record_body {
         ($request_id != FCGI_NULL_REQUEST_ID && $content_length == 8)
           || throw(ERRMSG_MALFORMED, q/FCGI_EndRequestRecord/);
         @record{ qw(app_status protocol_status) } 
-          = parse_end_request_body($content);
+          = parse_end_request_body($_[2]);
     }
     elsif (   $type == FCGI_PARAMS
            || $type == FCGI_STDIN
@@ -207,22 +210,22 @@ sub parse_record_body {
            || $type == FCGI_DATA) {
         ($request_id != FCGI_NULL_REQUEST_ID)
           || throw(ERRMSG_MALFORMED, $FCGI_RECORD_NAME[$type]);
-        $record{content} = $content_length ? $content : '';
+        $record{content} = $content_length ? $_[2] : '';
     }
     elsif (   $type == FCGI_GET_VALUES
            || $type == FCGI_GET_VALUES_RESULT) {
         ($request_id == FCGI_NULL_REQUEST_ID)
           || throw(ERRMSG_MALFORMED, $FCGI_RECORD_NAME[$type]);
-        $record{values} = parse_params($content);
+        $record{values} = parse_params($_[2]);
     }
     elsif ($type == FCGI_UNKNOWN_TYPE) {
         ($request_id == FCGI_NULL_REQUEST_ID && $content_length == 8)
           || throw(ERRMSG_MALFORMED, q/FCGI_UnknownTypeRecord/);
-        $record{unknown_type} = parse_unknown_type_body($content);
+        $record{unknown_type} = parse_unknown_type_body($_[2]);
     }
     else {
         # unknown record type, pass content so caller can decide appropriate action
-        $record{content} = $content if $content_length;
+        $record{content} = $_[2] if $content_length;
     }
 
     return \%record;
@@ -291,11 +294,11 @@ sub parse_params {
         for ($klen, $vlen) {
             (1 <= length $octets)
               || throw(ERRMSG_OCTETS, q/FCGI_NameValuePair/);
-            $_ = unpack('C', substr($octets, 0, 1, ''));
+            $_ = vec(substr($octets, 0, 1, ''), 0, 8);
             next if $_ < 0x80;
             (3 <= length $octets)
               || throw(ERRMSG_OCTETS, q/FCGI_NameValuePair/);
-            $_ = unpack('N', pack('C', $_ & 0x7F) . substr($octets, 0, 3, ''));
+            $_ = vec(pack('C', $_ & 0x7F) . substr($octets, 0, 3, ''), 0, 32);
         }
         ($klen + $vlen <= length $octets)
           || throw(ERRMSG_OCTETS, q/FCGI_NameValuePair/);
@@ -307,21 +310,19 @@ sub parse_params {
 
 sub check_params {
     @_ == 1 || throw(q/Usage: check_params(octets)/);
-    my ($octets) = @_;
-
-    (defined $octets)
+    (defined $_[0])
       || return FALSE;
 
-    my ($len, $off, $klen, $vlen) = (length($octets), 0, 0, 0);
+    my ($len, $off, $klen, $vlen) = (length $_[0], 0, 0, 0);
     while ($off < $len) {
         for ($klen, $vlen) {
             (($off += 1) <= $len)
               || return FALSE;
-            $_ = unpack('C', substr($octets, $off - 1, 1));
+            $_ = vec($_[0], $off - 1, 8);
             next if $_ < 0x80;
             (($off += 3) <= $len)
               || return FALSE;
-            $_ = unpack('N', substr($octets, $off - 4, 4)) & 0x7FFF_FFFF;
+            $_ = vec(substr($_[0], $off - 4, 4), 0, 32) & 0x7FFF_FFFF;
         }
         (($off += $klen + $vlen) <= $len)
           || return FALSE;

@@ -6,7 +6,7 @@ use warnings;
 use lib 't/lib', 'lib';
 use myconfig;
 
-use Test::More tests => 20;
+use Test::More tests => 33;
 use Test::HexString;
 use Test::Exception;
 
@@ -82,6 +82,13 @@ my @malformed = (
 foreach my $test (@malformed) {
     my ($type, $request_id) = @$test;
     throws_ok { parse_record_body($type, $request_id, '') } qr/^FastCGI: Malformed/;
+}
+
+{
+    my $content = "\x00" x (FCGI_MAX_CONTENT_LEN + 1);
+    foreach my $type (0..12) {
+        throws_ok { parse_record_body($type, 0, $content) } qr/^FastCGI: Malformed/;
+    }
 }
 
 # parse_record_body(type, request_id, content)

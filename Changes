@@ -1,3 +1,9 @@
+0.10 2010-04-02
+    - Minor optimizations to avoid unnecessary copying of '$content' strings
+    - Fixed dump_record() to properly insert ellipsis when truncating stream content
+      - added tests for this
+    - Added more tests for dump_record()
+
 0.09 2010-03-31
     - Added check_params() and dump_record()
       - added documentation 

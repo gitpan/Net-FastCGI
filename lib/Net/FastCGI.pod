@@ -116,7 +116,7 @@ Responds to management records. Capable of multiplexing.
 
 =item L<FCGI::Client>
 
-Web server (client) implementation. Supports Responder role.
+Client (Web server) implementation. Supports Responder role.
 
 =item L<FCGI::EV>
 

@@ -5,10 +5,10 @@ use warnings;
 
 use Carp                   qw[croak];
 use Net::FastCGI           qw[];
-use Net::FastCGI::Constant qw[:type FCGI_KEEP_CONN];
+use Net::FastCGI::Constant qw[:type FCGI_KEEP_CONN FCGI_MAX_CONTENT_LEN];
 
 BEGIN {
-    our $VERSION   = 0.09;
+    our $VERSION   = '0.10';
     our @EXPORT_OK = qw[ build_begin_request
                          build_begin_request_body
                          build_begin_request_record
@@ -43,7 +43,7 @@ BEGIN {
 
     if (!$use_pp) {
         eval {
-            require Net::FastCGI::XS;
+            require Net::FastCGI::Protocol::XS;
         };
     }
 
@@ -63,54 +63,52 @@ BEGIN {
     *import = \&Exporter::import;
 }
 
-our $DUMP_RECORD_LEN   = 78;   # undocumented
+our $DUMP_RECORD_MAX   = 78;   # undocumented
 our $DUMP_RECORD_ALIGN = !!0;  # undocumented
 
 my %ESCAPES = (
-    "\a"   => "\\a",
-    "\b"   => "\\b",
-    "\t"   => "\\t",
-    "\n"   => "\\n",
-    "\x0B" => "\\v",
-    "\f"   => "\\f",
-    "\r"   => "\\r",
+    "\a" => "\\a",
+    "\b" => "\\b",
+    "\t" => "\\t",
+    "\n" => "\\n",
+    "\f" => "\\f",
+    "\r" => "\\r",
 );
 
 sub dump_record {
     @_ == 2 || @_ == 3 || croak(q/Usage: dump_record(type, request_id [, content])/);
-    my ($type, $request_id, $content) = @_;
+    my ($type, $request_id) = @_;
 
-    $content = ''
-      unless defined $content;
+    my $content_length = defined $_[2] ? length $_[2] : 0;
 
-    my $max = $DUMP_RECORD_LEN > 0 ? $DUMP_RECORD_LEN : ~0;
+    my $max = $DUMP_RECORD_MAX > 0 ? $DUMP_RECORD_MAX : FCGI_MAX_CONTENT_LEN;
     my $out = '';
 
     if (   $type == FCGI_PARAMS
         || $type == FCGI_GET_VALUES
         || $type == FCGI_GET_VALUES_RESULT) {
-        if (length $content == 0) {
+        if ($content_length == 0) {
             $out = q[""];
         }
-        elsif (check_params($content)) {
+        elsif (check_params($_[2])) {
             my ($off, $klen, $vlen) = (0);
-            while ($off < length $content) {
+            while ($off < $content_length) {
                 my $pos = $off;
                 for ($klen, $vlen) {
-                    $_ = unpack('C', substr($content, $off, 1));
-                    $_ = unpack('N', substr($content, $off, 4)) & 0x7FFF_FFFF
+                    $_ = vec($_[2], $off, 8);
+                    $_ = vec($_[2], $off, 32) & 0x7FFF_FFFF
                       if $_ > 0x7F;
                     $off += $_ > 0x7F ? 4 : 1;
                 }
 
-                my $head = substr($content, $pos, $off - $pos);
+                my $head = substr($_[2], $pos, $off - $pos);
                    $head =~ s/(.)/sprintf('\\%.3o',ord($1))/egs;
                 $out .= $head;
 
-                my $body = substr($content, $off, $klen + $vlen);
+                my $body = substr($_[2], $off, $klen + $vlen);
                 for ($body) {
                     s/([\\\"])/\\$1/g;
-                    s/([\a\b\t\n\x0B\f\r])/$ESCAPES{$1}/g;
+                    s/([\a\b\t\n\f\r])/$ESCAPES{$1}/g;
                     s/([^\x20-\x7E])/sprintf('\\x%.2X',ord($1))/eg;
                 }
                 $out .= $body;
@@ -128,51 +126,49 @@ sub dump_record {
     elsif (   $type == FCGI_BEGIN_REQUEST
            || $type == FCGI_END_REQUEST
            || $type == FCGI_UNKNOWN_TYPE) {
-        if (length $content != 8) {
+        if ($content_length != 8) {
             my $name = $type == FCGI_BEGIN_REQUEST ? 'FCGI_BeginRequestBody'
                      : $type == FCGI_END_REQUEST   ? 'FCGI_EndRequestBody'
                      :                               'FCGI_UnknownTypeBody';
-            $out = sprintf 'Malformed %s (expected 8 octets got %d)', $name, length $content;
+            $out = sprintf '{Malformed %s (expected 8 octets got %d)}', $name, $content_length;
+        }
+        elsif ($type == FCGI_BEGIN_REQUEST) {
+            my ($role, $flags) = parse_begin_request_body($_[2]);
+            if ($flags != 0) {
+                my @set;
+                if ($flags & FCGI_KEEP_CONN) {
+                    $flags &= ~FCGI_KEEP_CONN;
+                    push @set, 'FCGI_KEEP_CONN';
+                }
+                if ($flags) {
+                    push @set, sprintf '0x%.2X', $flags;
+                }
+                $flags = join '|', @set;
+            }
+            $out = sprintf '{%s, %s}', get_role_name($role), $flags;
+        }
+        elsif($type == FCGI_END_REQUEST) {
+            my ($astatus, $pstatus) = parse_end_request_body($_[2]);
+            $out = sprintf '{%d, %s}', $astatus, get_protocol_status_name($pstatus);
         }
         else {
-            if ($type == FCGI_BEGIN_REQUEST) {
-                my ($role, $flags) = parse_begin_request_body($content);
-                if ($flags != 0) {
-                    my @set;
-                    if ($flags & FCGI_KEEP_CONN) {
-                        $flags &= ~FCGI_KEEP_CONN;
-                        push @set, 'FCGI_KEEP_CONN';
-                    }
-                    if ($flags) {
-                        push @set, sprintf '0x%.2X', $flags;
-                    }
-                    $flags = join '|', @set;
-                }
-                $out = sprintf '{%s, %s}', get_role_name($role), $flags;
-            }
-            elsif($type == FCGI_END_REQUEST) {
-                my ($astatus, $pstatus) = parse_end_request_body($content);
-                $out = sprintf '{%d, %s}', $astatus, get_protocol_status_name($pstatus);
-            }
-            else {
-                my $unknown_type = parse_unknown_type_body($content);
-                $out = sprintf '{%s}', get_type_name($unknown_type);
-            }
+            my $unknown_type = parse_unknown_type_body($_[2]);
+            $out = sprintf '{%s}', get_type_name($unknown_type);
         }
     }
-    elsif (length $content) {
+    elsif ($content_length) {
         my $looks_like_binary = do {
-            my $count = () = $content =~ /[\r\n\t\x20-\x7E]/g;
-            ($count / length $content) < 0.7;
+            my $count = () = $_[2] =~ /[\r\n\t\x20-\x7E]/g;
+            ($count / $content_length) < 0.7;
         };
-        $out = substr($content, 0, $max);
+        $out = substr($_[2], 0, $max + 1);
         for ($out) {
             if ($looks_like_binary) {
                 s/(.)/sprintf('\\x%.2X',ord($1))/egs;
             }
             else {
                 s/([\\\"])/\\$1/g;
-                s/([\a\b\t\n\x0B\f\r])/$ESCAPES{$1}/g;
+                s/([\a\b\t\n\f\r])/$ESCAPES{$1}/g;
                 s/([^\x20-\x7E])/sprintf('\\x%.2X',ord($1))/eg;
             }
         }
