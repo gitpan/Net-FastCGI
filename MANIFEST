@@ -21,6 +21,7 @@ META.yml
 README
 t/000_load.t
 t/020_protocol/001_header.t
+t/020_protocol/005_record_length.t
 t/020_protocol/010_build_record.t
 t/020_protocol/015_build_stream.t
 t/020_protocol/020_begin_request_body.t
@@ -37,6 +38,7 @@ t/020_protocol/060_params.t
 t/020_protocol/065_record_type.t
 t/020_protocol/070_names.t
 t/020_protocol/080_dump_record.t
+t/020_protocol/085_dump_record_body.t
 t/lib/myconfig.pm
 xt/000_pod.t
 xt/010_pod_coverage.t

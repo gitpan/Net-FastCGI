@@ -1,5 +1,5 @@
 ---
-abstract: FastCGI
+abstract: 'FastCGI Toolkit'
 author:
   - 'Christian Hansen C<chansen@cpan.org>'
 build_requires:
@@ -27,4 +27,5 @@ requires:
   perl: 5.6.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.10
+  repository: http://github.com/chansen/p5-net-fastcgi
+version: 0.11

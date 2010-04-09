@@ -33,16 +33,20 @@ Net::FastCGI::Protocol - Provides functions to build and parse FastCGI messages.
     # FCGI_NameValuePair's
     $octets = build_params($params);
     $params = parse_params($octets);
+    $bool   = check_params($octets);
     
     # FCGI_Record
     $octets = build_record($type, $request_id);
     $octets = build_record($type, $request_id, $content);
     $record = parse_record($octets);
+    @values = parse_record($octets);
     $record = parse_record_body($type, $request_id, $content);
+    $string = dump_record($octets);
+    $string = dump_record_body($type, $request_id, $content);
     
     # Stream
-    $octets = build_stream($type, $request_id, $octets);
-    $octets = build_stream($type, $request_id, $octets, $terminate);
+    $octets = build_stream($type, $request_id, $content);
+    $octets = build_stream($type, $request_id, $content, $terminate);
     
     # Begin Request
     $octets = build_begin_request($request_id, $role, $flags, $params);
@@ -58,12 +62,12 @@ Net::FastCGI::Protocol - Provides functions to build and parse FastCGI messages.
 
 Provides functions to build and parse FastCGI messages.
 
+=head1 FUNCTIONS
+
 Please note that all functions in this package expects octets, not unicode strings.
 It's the callers responsibility to ensure this. If any of theese functions is called
 with unicode strings containing code points above 255, they will most likely produce
 malformed messages.
-
-=head1 FUNCTIONS
 
 =head2 build_begin_request
 
@@ -81,7 +85,7 @@ I<Arguments>
 
 =item C<$request_id>
 
-An unsigned 16-bit integer. ID of the request.
+An unsigned 16-bit integer. Identifier of the request.
 
 =item C<$role>
 
@@ -95,19 +99,20 @@ mask C<FCGI_KEEP_CONN> if a persistent connection is desired.
 
 =item C<$params>
 
-A hash reference containing name/value pairs. Typically this is the CGI environ 
-that the application expects.
+A hash reference containing name-value pairs. This is the CGI environ that the 
+application expects.
 
 =item C<$stdin> (optional)
 
-A string of octets containing the C<FCGI_STDIN> data. This should only be provided if 
-C<$role> is set to either C<FCGI_RESPONDER> or C<FCGI_FILTER>. Maybe C<undef> or empty. 
-Stream is terminated if provided.
+A string of octets containing the C<FCGI_STDIN> content. This should only be 
+provided if C<$role> is set to either C<FCGI_RESPONDER> or C<FCGI_FILTER>. The 
+C<FCGI_STDIN> stream is terminated if provided.
 
 =item C<$data> (optional)
 
-A string of octets containing the C<FCGI_DATA> data. This should only be provided if 
-C<$role> is set to C<FCGI_FILTER>. Maybe C<undef> or empty. Stream is terminated if provided.
+A string of octets containing the C<FCGI_DATA> content. This should only be 
+provided if C<$role> is set to C<FCGI_FILTER>. The C<FCGI_DATA> stream is 
+terminated if provided.
 
 =back
 
@@ -205,7 +210,7 @@ I<Arguments>
 
 =item C<$request_id>
 
-An unsigned 16-bit integer. ID of the request.
+An unsigned 16-bit integer. Identifier of the request.
 
 =item C<$app_status>
 
@@ -218,13 +223,13 @@ C<FCGI_CANT_MPX_CONN>, C<FCGI_OVERLOADED> or C<FCGI_UNKNOWN_ROLE>.
 
 =item C<$stdout> (optional)
 
-A string of octets containing the C<FCGI_STDOUT> data. Maybe C<undef> or empty. 
-Stream is terminated if provided.
+A string of octets containing the C<FCGI_STDOUT> content. The C<FCGI_STDOUT>
+stream is terminated if provided.
 
 =item C<$stderr> (optional)
 
-A string of octets containing the C<FCGI_STDERR> data. Maybe C<undef> or empty.
-Stream is terminated if provided.
+A string of octets containing the C<FCGI_STDERR> content. The C<FCGI_STDERR>
+stream is terminated if provided.
 
 =back
 
@@ -365,7 +370,7 @@ I<Arguments>
 
 =item C<$params>
 
-A hash reference containing name/value pairs.
+A hash reference containing name-value pairs.
 
 =back
 
@@ -400,7 +405,7 @@ An unsigned 16-bit integer.
 
 =item C<$content> (optional)
 
-A string of octets containing the content, cannot exceed 65535 octets in length. May be C<undef>.
+A string of octets containing the content, cannot exceed 65535 octets in length.
 
 =back
 
@@ -442,7 +447,7 @@ An unsigned 16-bit integer.
 
 =item C<$content>
 
-A string of octets containing the stream content. May be C<undef>.
+A string of octets containing the stream content.
 
 =item C<$terminate> (optional)
 
@@ -463,7 +468,7 @@ A string of octets containing the stream.
 
 I<Note>
 
-Stream is not terminated if C<$content> is C<undef> or empty unless C<$terminate> is set.
+Stream is not terminated if C<$content> is empty unless C<$terminate> is set.
 
 C<$content> is split in segment sizes of 32760 octets (32768 - FCGI_HEADER_LEN).
 
@@ -557,8 +562,36 @@ Dump a C<FCGI_Record>.
 
 I<Usage>
 
-    $string = dump_record($type, $request_id);
-    $string = dump_record($type, $request_id, $content);
+    $string = dump_record($octets);
+
+I<Arguments>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing at least one record.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$string>
+
+A short (less than 100 characters) string representation of the record in printable US-ASCII.
+
+=back
+
+=head2 dump_record_body
+
+Dump a C<FCGI_Record>.
+
+I<Usage>
+
+    $string = dump_record_body($type, $request_id);
+    $string = dump_record_body($type, $request_id, $content);
 
 I<Arguments>
 
@@ -574,7 +607,7 @@ An unsigned 16-bit integer.
 
 =item C<$content> (optional)
 
-A string of octets containing the content. Maybe C<undef>.
+A string of octets containing the content.
 
 =back
 
@@ -584,7 +617,7 @@ I<Returns>
 
 =item C<$string>
 
-A string consisting of a short (less than 100 characters) representation of record in printable US-ASCII.
+A short (less than 100 characters) string representation of the record in printable US-ASCII.
 
 =back
 
@@ -664,6 +697,8 @@ I<Usage>
     $header = parse_header($octets);
     print $header->{type};
     print $header->{request_id};
+    print $header->{content_length};
+    print $header->{padding_length};
 
 I<Arguments>
 
@@ -725,7 +760,7 @@ I<Returns>
 
 =item C<$params>
 
-A hash reference containing name/value pairs.
+A hash reference containing name-value pairs.
 
 =back
 
@@ -735,7 +770,12 @@ Parses a C<FCGI_Record>.
 
 I<Usage>
 
+    ($type, $request_id, $content)
+      = parse_record($octets);
+
     $record = parse_record($octets);
+    print $record->{type};
+    print $record->{request_id};
 
 I<Arguments>
 
@@ -749,78 +789,36 @@ A string of octets containing at least one record.
 
 I<Returns>
 
-A hash reference which represents the record. The content depends on the
-type of record. All record types have the keys: C<type> and C<request_id>.
+In list context:
 
 =over 4
 
-=item C<FCGI_BEGIN_REQUEST>
+=item C<$type>
 
-=over 8
+An unsigned 8-bit integer.
 
-=item C<role>
+=item C<$request_id>
 
-=item C<flags>
+An unsigned 16-bit integer.
 
-=back
+=item C<$content>
 
-=item C<FCGI_END_REQUEST>
-
-=over 8
-
-=item C<app_status>
-
-=item C<protocol_status>
+A string of octets containing the record content.
 
 =back
 
-=item C<FCGI_PARAMS>
-
-=item C<FCGI_STDIN>
-
-=item C<FCGI_DATA>
-
-=item C<FCGI_STDOUT>
-
-=item C<FCGI_STDERR>
-
-=over 8
-
-=item C<content>
-
-A string of octets containing the content of the stream. Can be empty but not C<undef>.
-
-=back
-
-=item C<FCGI_GET_VALUES> 
-
-=item C<FCGI_GET_VALUES_RESULT>
-
-=over 8
-
-=item C<values>
-
-A hash reference containing name-value pairs.
-
-=back
-
-=item C<FCGI_UNKNOWN_TYPE>
-
-=over 8
-
-=item C<unknown_type>
-
-=back
-
-=back
+In scalar context a hash reference containing the C<FCGI_Record> components. 
+See L</parse_record_body>.
 
 =head2 parse_record_body
 
-Parses a C<FCGI_Record> body.
+Parses a C<FCGI_Record>.
 
 I<Usage>
 
     $record = parse_record_body($type, $request_id, $content);
+    print $record->{type};
+    print $record->{request_id};
 
 I<Arguments>
 
@@ -842,8 +840,80 @@ A string of octets containing the record content.
 
 I<Returns>
 
-Returns a hash reference containing the C<FCGI_Record> components.
-See L</parse_record>.
+A hash reference which represents the C<FCGI_Record>. The content depends on the
+type of record. All record types have the keys: C<type> and C<request_id>.
+
+=over 4
+
+=item C<FCGI_BEGIN_REQUEST>
+
+=over 8
+
+=item C<role>
+
+An unsigned 16-bit integer.
+
+=item C<flags>
+
+An unsigned 8-bit integer.
+
+=back
+
+=item C<FCGI_END_REQUEST>
+
+=over 8
+
+=item C<app_status>
+
+An unsigned 32-bit integer.
+
+=item C<protocol_status>
+
+An unsigned 8-bit integer.
+
+=back
+
+=item C<FCGI_PARAMS>
+
+=item C<FCGI_STDIN>
+
+=item C<FCGI_DATA>
+
+=item C<FCGI_STDOUT>
+
+=item C<FCGI_STDERR>
+
+=over 8
+
+=item C<content>
+
+A string of octets containing the content of the stream.
+
+=back
+
+=item C<FCGI_GET_VALUES> 
+
+=item C<FCGI_GET_VALUES_RESULT>
+
+=over 8
+
+=item C<values>
+
+A hash reference containing name-value pairs.
+
+=back
+
+=item C<FCGI_UNKNOWN_TYPE>
+
+=over 8
+
+=item C<unknown_type>
+
+An unsigned 8-bit integer.
+
+=back
+
+=back
 
 =head2 parse_unknown_type_body
 
@@ -870,6 +940,33 @@ I<Returns>
 =item C<$type>
 
 An unsigned 8-bit integer.
+
+=back
+
+=head2 get_record_length
+
+I<Usage>
+
+    $length = get_record_length($octets);
+
+I<Arguments>
+
+=over 4
+
+=item C<$octets>
+
+A string of octets containing at least one C<FCGI_Header>.
+
+=back
+
+I<Returns>
+
+=over 4
+
+=item C<$length>
+
+An unsigned integer containing the length of record in octets. If C<$octets> 
+contains insufficient octets C<(< FCGI_HEADER_LEN)> C<0> is returned.
 
 =back
 

@@ -87,7 +87,7 @@ foreach my $test (@malformed) {
 {
     my $content = "\x00" x (FCGI_MAX_CONTENT_LEN + 1);
     foreach my $type (0..12) {
-        throws_ok { parse_record_body($type, 0, $content) } qr/^FastCGI: Malformed/;
+        throws_ok { parse_record_body($type, 0, $content) } qr/^Invalid Argument: 'content' cannot exceed/;
     }
 }
 

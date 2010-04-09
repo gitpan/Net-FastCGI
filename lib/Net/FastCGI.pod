@@ -1,8 +1,27 @@
 =head1 NAME
 
-Net::FastCGI - FastCGI
+Net::FastCGI - FastCGI Toolkit
 
 =head1 DESCRIPTION
+
+This distribution aims to provide a complete API for working with the FastCGI
+protocol.
+
+The primary goal is to provide a function oriented and object oriented API which 
+are not tied to a specific I/O model or framework.
+
+Secondary goal is to provide higher level tools/API which can be used for debugging
+and interoperability testing.
+
+=head1 PROGRESS
+
+The function oriented API is considered feature complete. L<Net::FastCGI::Protocol> 
+provides functions to build and parse all FastCGI v1.0 messages, also provided is a 
+few convenient higher level functions such as C<build_begin_request()>, 
+C<build_end_request()>, C<parse_record()> and C<dump_record()>.
+
+Work has begun on object oriented implementation and a simple blocking I/O class which is
+intended for testing and debugging.
 
 =head1 PACKAGES
 
@@ -51,10 +70,6 @@ In addition to Run-Time:
 
 =back
 
-=head1 EXPORTS
-
-None.
-
 =head1 SEE ALSO
 
 =head2 Community
@@ -95,7 +110,7 @@ L<http://cryp.to/publications/fastcgi/>
 
 =back
 
-=head2 Implementations
+=head2 Perl implementations
 
 =over 4
 
@@ -132,6 +147,11 @@ Application server implementation, built on top of L<POE>. Supports Responder ro
 Capable of multiplexing.
 
 =back
+
+=head1 SUPPORT
+
+Please report any bugs or feature requests to C<bug-net-fastcgi@rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Net-FastCGI>
 
 =head1 AUTHOR
 
