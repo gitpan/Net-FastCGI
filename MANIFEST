@@ -11,6 +11,8 @@ lib/Net/FastCGI.pm
 lib/Net/FastCGI.pod
 lib/Net/FastCGI/Constant.pm
 lib/Net/FastCGI/Constant.pod
+lib/Net/FastCGI/IO.pm
+lib/Net/FastCGI/IO.pod
 lib/Net/FastCGI/Protocol.pm
 lib/Net/FastCGI/Protocol.pod
 lib/Net/FastCGI/Protocol/PP.pm
