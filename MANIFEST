@@ -1,4 +1,7 @@
 Changes
+eg/runfcgi.pl
+eg/server.pl
+eg/server_buff.pl
 inc/Module/Install.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm

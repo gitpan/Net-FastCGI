@@ -8,7 +8,7 @@ use Net::FastCGI           qw[];
 use Net::FastCGI::Constant qw[:type :common FCGI_KEEP_CONN];
 
 BEGIN {
-    our $VERSION   = '0.12';
+    our $VERSION   = '0.13';
     our @EXPORT_OK = qw[ build_begin_request
                          build_begin_request_body
                          build_begin_request_record
@@ -43,17 +43,17 @@ BEGIN {
     my $use_pp = $ENV{NET_FASTCGI_PP} || $ENV{NET_FASTCGI_PROTOCOL_PP};
 
     if (!$use_pp) {
-        eval {
+        eval { 
             require Net::FastCGI::Protocol::XS;
         };
+        $use_pp = !!$@;
     }
 
-    if ($use_pp || $@) {
+    if ($use_pp) {
         require Net::FastCGI::Protocol::PP;
         Net::FastCGI::Protocol::PP->import(@EXPORT_OK);
     }
     else {
-        require Net::FastCGI::Protocol::XS;
         Net::FastCGI::Protocol::XS->import(@EXPORT_OK);
     }
 
